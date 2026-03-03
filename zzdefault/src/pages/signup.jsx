@@ -1,5 +1,5 @@
 import { useState } from "react";
-import "./css/hub.css";
+import "./css/default.css";
 
 function Layout() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -18,7 +18,7 @@ function Layout() {
         </div>
 
         <div className="header-center">
-          <img src="/logofannonmetalic.png" style={{ height: "65px", width: "auto" }} />
+          <img src="/logofannonmetalic.png" style={{ height: "75px", width: "auto" }} />
         </div>
 
         <div className="header-right">
