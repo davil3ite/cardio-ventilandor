@@ -1,11 +1,14 @@
 import { useState } from "react";
+import { useNavigate } from 'react-router-dom'
 import "./css/hub.css";
 
 function Layout() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const navigate = useNavigate()
+  const [darkMode, setDarkMode] = useState(true);
 
   return (
-    <>
+    <div className={darkMode ? "theme-dark" : "theme-light"}>
       <header className="header">
         <div className="header-left">
           <button
@@ -18,7 +21,10 @@ function Layout() {
         </div>
 
         <div className="header-center">
-          <img src="/logofannonmetalic.png" style={{ height: "65px", width: "auto" }} />
+          <button className="btn-logo" onClick={navigate('/')}>
+            <img src="/logofannonmetalic.png" style={{ height: "65px", width: "auto" }} />
+          </button>
+          
         </div>
 
         <div className="header-right">
@@ -32,11 +38,20 @@ function Layout() {
         onClick={() => setSidebarOpen(false)}
       />
 
-      <aside className={`sidebar ${sidebarOpen ? "open" : ""}`} />
+      <aside className={`sidebar ${sidebarOpen ? "open" : ""}`}>
+        <div className="sidebar-footer">
+          <span className="theme-label">{darkMode ? "Escuro" : "Claro"}</span>
+          <button
+            className={`theme-switch ${darkMode ? "on" : ""}`}
+            onClick={() => setDarkMode((v) => !v)}
+            aria-label="Toggle theme"
+          />
+        </div>
+      </aside>
 
       <main className="page-content">
       </main>
-    </>
+    </div>
   );
 }
 
