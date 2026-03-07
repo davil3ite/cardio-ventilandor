@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from 'react-router-dom'
-import "./css/hub.css";
+import "./css/signup.css";
 
 function Layout() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -21,7 +21,7 @@ function Layout() {
         </div>
 
         <div className="header-center">
-          <button className="btn-logo">
+          <button className="btn-logo" onClick={() => navigate('/')}>
             <img src="/logofannonmetalic.png" style={{ height: "65px", width: "auto" }} />
           </button>
           
@@ -29,7 +29,7 @@ function Layout() {
 
         <div className="header-right">
           <button className="btn-login" onClick={() => navigate('/login')}>Login</button>
-          <button className="btn-signup" onClick={() => navigate('/signup')}>Sign up</button>
+          <button className="btn-signup">Sign up</button>
         </div>
       </header>
 
