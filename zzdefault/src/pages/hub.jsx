@@ -16,12 +16,12 @@ function Layout() {
             onClick={() => setSidebarOpen((v) => !v)}
             aria-label="Toggle menu"
           >
-            <span /><span /><span />
+            <span/><span/><span/>
           </button>
         </div>
 
         <div className="header-center">
-          <button className="btn-logo">
+          <button className="btn-logo" disabled="true">
             <img src="/logofannonmetalic.png" style={{ height: "65px", width: "auto" }} />
           </button>
           
@@ -39,13 +39,22 @@ function Layout() {
       />
 
       <aside className={`sidebar ${sidebarOpen ? "open" : ""}`}>
+        <div className="sidebar-header">
+          <button className="sidebar-home" onClick={() => navigate('/')}>Início</button>
+        </div>
         <div className="sidebar-footer">
-          <span className="theme-label">{darkMode ? "Escuro" : "Claro"}</span>
-          <button
-            className={`theme-switch ${darkMode ? "on" : ""}`}
-            onClick={() => setDarkMode((v) => !v)}
-            aria-label="Toggle theme"
-          />
+          <div className="sidebar-logsign">
+            <button className="sb-login" onClick={() => navigate('/login')}>Login</button>
+            <button className="sb-signup" onClick={() => navigate('/signup')}>Sign up</button>
+          </div>
+          <div className="theme-div">
+            <span className="theme-label">{darkMode ? "Escuro" : "Claro"}</span>
+            <button
+              className={`theme-switch ${darkMode ? "on" : ""}`}
+              onClick={() => setDarkMode((v) => !v)}
+              aria-label="Toggle theme"
+            />
+          </div>
         </div>
       </aside>
 

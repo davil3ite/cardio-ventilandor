@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from 'react-router-dom'
-import "./css/signup.css";
+import "./css/hub.css";
 
 function Layout() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -16,7 +16,7 @@ function Layout() {
             onClick={() => setSidebarOpen((v) => !v)}
             aria-label="Toggle menu"
           >
-            <span /><span /><span />
+            <span/><span/><span/>
           </button>
         </div>
 
@@ -29,7 +29,7 @@ function Layout() {
 
         <div className="header-right">
           <button className="btn-login" onClick={() => navigate('/login')}>Login</button>
-          <button className="btn-signup">Sign up</button>
+          <button className="btn-signup" disabled="true">Sign up</button>
         </div>
       </header>
 
@@ -39,13 +39,22 @@ function Layout() {
       />
 
       <aside className={`sidebar ${sidebarOpen ? "open" : ""}`}>
+        <div className="sidebar-header">
+          <button className="sidebar-home" onClick={() => navigate('/')}>Início</button>
+        </div>
         <div className="sidebar-footer">
-          <span className="theme-label">{darkMode ? "Escuro" : "Claro"}</span>
-          <button
-            className={`theme-switch ${darkMode ? "on" : ""}`}
-            onClick={() => setDarkMode((v) => !v)}
-            aria-label="Toggle theme"
-          />
+          <div className="sidebar-logsign">
+            <button className="sb-login" disabled="true">Login</button>
+            <button className="sb-signup" onClick={() => navigate('/signup')}>Sign up</button>
+          </div>
+          <div className="theme-div">
+            <span className="theme-label">{darkMode ? "Escuro" : "Claro"}</span>
+            <button
+              className={`theme-switch ${darkMode ? "on" : ""}`}
+              onClick={() => setDarkMode((v) => !v)}
+              aria-label="Toggle theme"
+            />
+          </div>
         </div>
       </aside>
 
