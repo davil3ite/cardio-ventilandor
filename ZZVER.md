@@ -1,4 +1,16 @@
-**`v1.1.3:`**
+**`v1.2.0:`**
+*- Created write.jsx*
+*- Created article.jsx*
+*- Created article.css*
+*- Created write.css*
+*- Created auth.js*
+*- Created articles.js*
+*- Added writing system (italic formatation option does not work yet)*
+*- Added Sign Up and Login system*
+*- Added article system*
+*- Fixed bug where light mode had to be re-enable light mode every time you changed pages*
+
+**v1.1.3:**
 *- Added "Home" button to every pages's sidebars*
 *- Added "disabled" property to all buttons that shouldn't work*
 *- Added "Login" and "Sign Up" buttons to every pages's sidebars*
