@@ -8,7 +8,7 @@
 *- Added writing system (italic formatation option does not work yet)*
 *- Added Sign Up and Login system*
 *- Added article system*
-*- Fixed bug where light mode had to be re-enable light mode every time you changed pages*
+*- Fixed bug where light mode had to be re-enabled every time you changed pages*
 
 **v1.1.3:**
 *- Added "Home" button to every pages's sidebars*
