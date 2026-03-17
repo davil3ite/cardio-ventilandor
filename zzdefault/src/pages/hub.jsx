@@ -95,7 +95,7 @@ function Layout() {
 
       <main className="page-content">
         {articles.length === 0 ? (
-          <p className="page-hint">Nenhuma matéria publicada ainda.</p>
+          <p className="page-hint"></p>
         ) : (
           <div className="articles-grid">
             {articles.map((a) => (

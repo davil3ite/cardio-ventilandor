@@ -1,4 +1,8 @@
-**`v1.2.0:`**
+**`v1.2.0.1:`**
+*- Published to a Vercel site (https://cardio-ventilandor.vercel.app)*
+*- Updated page title & page logo*
+
+**v1.2.0:**
 *- Created write.jsx*
 *- Created article.jsx*
 *- Created article.css*
