@@ -8,6 +8,7 @@ function Login() {
   const [darkMode, setDarkMode] = useState(() => localStorage.getItem("fannon_theme") !== "light");
   const [form, setForm] = useState({ email: "", password: "" });
   const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
 
   function handleChange(e) {
     setForm((f) => ({ ...f, [e.target.name]: e.target.value }));
@@ -22,12 +23,14 @@ function Login() {
     });
   }
 
-  function handleSubmit() {
+  async function handleSubmit() {
     if (!form.email || !form.password) {
       setError("Preencha todos os campos.");
       return;
     }
-    const result = login(form);
+    setLoading(true);
+    const result = await login(form);
+    setLoading(false);
     if (!result.ok) {
       setError("Email ou senha incorretos.");
       return;
@@ -74,7 +77,9 @@ function Login() {
 
           {error && <p className="auth-error">{error}</p>}
 
-          <button className="auth-submit" onClick={handleSubmit}>Entrar</button>
+          <button className="auth-submit" onClick={handleSubmit} disabled={loading}>
+            {loading ? "Entrando..." : "Entrar"}
+          </button>
 
           <p className="auth-switch">
             Não tem conta?{" "}

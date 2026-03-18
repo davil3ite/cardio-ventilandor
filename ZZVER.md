@@ -1,3 +1,11 @@
+# **v1.2.1:**
+
+*- Created profile page (profile.jsx; profile.css)*
+*- Added profile pictures*
+*- Added IG page link*
+*- Added password, username, email and name changing to accounts*
+*- Added delete option to accounts*
+
 # **v1.2.0.1:**
 
 *- Published to a Vercel site ([Folha Alfa News](https://folhaalfanews.vercel.app))*

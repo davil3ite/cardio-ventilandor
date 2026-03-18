@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { register, isUsernameTaken } from "../auth.js";
+import { register, isUsernameTaken, sanitizeUsername } from "../auth.js";
 import "./css/signup.css";
 
 function Signup() {
@@ -11,18 +11,24 @@ function Signup() {
   });
   const [usernameStatus, setUsernameStatus] = useState(null);
   const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
 
   function handleChange(e) {
-    setForm((f) => ({ ...f, [e.target.name]: e.target.value }));
+    let value = e.target.value;
+    if (e.target.name === "username") {
+      value = sanitizeUsername(value); // força minúsculas e remove chars inválidos
+      setUsernameStatus(null);
+    }
+    setForm((f) => ({ ...f, [e.target.name]: value }));
     setError("");
-    if (e.target.name === "username") setUsernameStatus(null);
   }
 
   useEffect(() => {
     if (!form.username) { setUsernameStatus(null); return; }
     setUsernameStatus("checking");
-    const t = setTimeout(() => {
-      setUsernameStatus(isUsernameTaken(form.username) ? "taken" : "available");
+    const t = setTimeout(async () => {
+      const taken = await isUsernameTaken(form.username);
+      setUsernameStatus(taken ? "taken" : "available");
     }, 500);
     return () => clearTimeout(t);
   }, [form.username]);
@@ -35,18 +41,23 @@ function Signup() {
     });
   }
 
-  function handleSubmit() {
+  async function handleSubmit() {
     if (!form.name || !form.username || !form.email || !form.password || !form.confirm) {
       setError("Preencha todos os campos."); return;
     }
     if (usernameStatus === "taken") { setError("Nome de usuário já existe."); return; }
+    if (usernameStatus === "checking") { setError("Aguarde a verificação do usuário."); return; }
     if (form.password !== form.confirm) { setError("As senhas não coincidem."); return; }
     if (form.password.length < 6) { setError("A senha precisa ter ao menos 6 caracteres."); return; }
 
-    const result = register(form);
+    setLoading(true);
+    const result = await register(form);
+    setLoading(false);
+
     if (!result.ok) {
       if (result.error === "username") setError("Nome de usuário já existe.");
-      if (result.error === "email") setError("Este email já está cadastrado.");
+      else if (result.error === "email") setError("Este email já está cadastrado.");
+      else if (result.error === "username_invalid") setError("Nome de usuário inválido.");
       return;
     }
     navigate("/login");
@@ -83,13 +94,14 @@ function Signup() {
             <label>Nome de usuário</label>
             <div className="username-wrap">
               <input
-                type="text" name="username" placeholder="@usuario"
+                type="text" name="username" placeholder="ex: joao_silva"
                 value={form.username} onChange={handleChange}
               />
               {usernameStatus === "checking" && <span className="ucheck checking">Verificando...</span>}
               {usernameStatus === "available" && <span className="ucheck available">✓ Disponível</span>}
               {usernameStatus === "taken" && <span className="ucheck taken">✗ Indisponível</span>}
             </div>
+            <span className="field-hint">Apenas letras minúsculas, números, hífens, pontos e underlines.</span>
           </div>
 
           <div className="auth-field">
@@ -119,7 +131,9 @@ function Signup() {
 
           {error && <p className="auth-error">{error}</p>}
 
-          <button className="auth-submit" onClick={handleSubmit}>Criar conta</button>
+          <button className="auth-submit" onClick={handleSubmit} disabled={loading}>
+            {loading ? "Criando conta..." : "Criar conta"}
+          </button>
 
           <p className="auth-switch">
             Já tem conta?{" "}

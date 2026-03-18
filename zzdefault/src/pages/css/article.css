@@ -133,3 +133,41 @@ body { font-family: 'DM Sans', sans-serif; min-height: 100vh; }
   font-size: 13px; font-weight: 500; cursor: pointer; transition: all 0.2s;
 }
 .btn-delete:hover { background: rgba(224,85,85,0.08); border-color: #e05555; }
+
+/* Cole no final do article.css */
+
+.article-author-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: -8px;
+}
+
+.article-avatar {
+  width: 32px; height: 32px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 1px solid #333;
+  flex-shrink: 0;
+}
+
+.article-avatar-placeholder {
+  width: 32px; height: 32px;
+  border-radius: 50%;
+  background: #222;
+  border: 1px solid #333;
+  color: #aaa;
+  font-size: 13px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'DM Sans', sans-serif;
+  flex-shrink: 0;
+}
+
+.article-author {
+  font-size: 13px;
+  color: #666;
+}
+.theme-light .article-author { color: #888; }

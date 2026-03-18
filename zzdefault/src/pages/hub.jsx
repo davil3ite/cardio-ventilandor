@@ -4,6 +4,8 @@ import { getSession, logout } from "../auth.js";
 import { getArticles, timeAgo } from "../articles.js";
 import "./css/hub.css";
 
+const INSTAGRAM_URL = "https://www.instagram.com/folha.alfa_news/";
+
 function Layout() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const navigate = useNavigate()
@@ -29,25 +31,25 @@ function Layout() {
     <div className={darkMode ? "theme-dark" : "theme-light"}>
       <header className="header">
         <div className="header-left">
-          <button
-            className={`menu-btn ${sidebarOpen ? "open" : ""}`}
-            onClick={() => setSidebarOpen((v) => !v)}
-            aria-label="Toggle menu"
-          >
+          <button className={`menu-btn ${sidebarOpen ? "open" : ""}`} onClick={() => setSidebarOpen((v) => !v)} aria-label="Toggle menu">
             <span/><span/><span/>
           </button>
         </div>
-
         <div className="header-center">
           <button className="btn-logo" disabled="true">
             <img src="/logofannonmetalic.png" style={{ height: "65px", width: "auto" }} />
           </button>
         </div>
-
         <div className="header-right">
           {session ? (
             <>
-              <span className="header-username">{session.name}</span>
+              <button className="header-profile-btn" onClick={() => navigate('/profile')}>
+                {session.avatar
+                  ? <img src={session.avatar} className="header-avatar" alt="avatar" />
+                  : <div className="header-avatar-placeholder">{session.name[0].toUpperCase()}</div>
+                }
+                <span className="header-username">{session.name}</span>
+              </button>
               {session.type === "adm" && (
                 <button className="btn-write" onClick={() => navigate('/write')}>Escrever</button>
               )}
@@ -62,19 +64,26 @@ function Layout() {
         </div>
       </header>
 
-      <div
-        className={`sidebar-overlay ${sidebarOpen ? "visible" : ""}`}
-        onClick={() => setSidebarOpen(false)}
-      />
+      <div className={`sidebar-overlay ${sidebarOpen ? "visible" : ""}`} onClick={() => setSidebarOpen(false)} />
 
       <aside className={`sidebar ${sidebarOpen ? "open" : ""}`}>
         <div className="sidebar-header">
           <button className="sidebar-home" onClick={() => navigate('/')}>Início</button>
         </div>
         <div className="sidebar-footer">
+          <a href={INSTAGRAM_URL} target="_blank" rel="noreferrer" className="sidebar-instagram">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+              <rect x="2" y="2" width="20" height="20" rx="5" ry="5"/>
+              <circle cx="12" cy="12" r="4"/>
+              <circle cx="17.5" cy="6.5" r="1" fill="currentColor" stroke="none"/>
+            </svg>
+          </a>
           <div className="sidebar-logsign">
             {session ? (
-              <button className="sb-login" onClick={handleLogout}>Sair</button>
+              <>
+                <button className="sb-login" onClick={() => navigate('/profile')}>Perfil</button>
+                <button className="sb-login" onClick={handleLogout}>Sair</button>
+              </>
             ) : (
               <>
                 <button className="sb-login" onClick={() => navigate('/login')}>Login</button>
@@ -84,11 +93,7 @@ function Layout() {
           </div>
           <div className="theme-div">
             <span className="theme-label">{darkMode ? "Escuro" : "Claro"}</span>
-            <button
-              className={`theme-switch ${darkMode ? "on" : ""}`}
-              onClick={toggleTheme}
-              aria-label="Toggle theme"
-            />
+            <button className={`theme-switch ${darkMode ? "on" : ""}`} onClick={toggleTheme} aria-label="Toggle theme" />
           </div>
         </div>
       </aside>
@@ -108,6 +113,10 @@ function Layout() {
                   <h2 className="card-headline">{a.headline}</h2>
                   <p className="card-excerpt">{a.body.replace(/<[^>]+>/g, '').slice(0, 120)}...</p>
                   <div className="card-meta">
+                    {a.author.avatar
+                      ? <img src={a.author.avatar} className="card-avatar" alt="avatar" />
+                      : <div className="card-avatar-placeholder">{a.author.name[0].toUpperCase()}</div>
+                    }
                     <span>{a.author.name}</span>
                     <span>{timeAgo(a.createdAt)}</span>
                   </div>
@@ -117,6 +126,18 @@ function Layout() {
           </div>
         )}
       </main>
+
+      <footer className="footer">
+        <a href={INSTAGRAM_URL} target="_blank" rel="noreferrer" className="footer-instagram">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+            <rect x="2" y="2" width="20" height="20" rx="5" ry="5"/>
+            <circle cx="12" cy="12" r="4"/>
+            <circle cx="17.5" cy="6.5" r="1" fill="currentColor" stroke="none"/>
+          </svg>
+          <span className="footer-dot">•</span>
+          <span>Siga-nos no Instagram</span>
+        </a>
+      </footer>
     </div>
   );
 }

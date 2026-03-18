@@ -58,17 +58,21 @@ function Article() {
       <main className="article-content">
         <div className="article-body">
           <span className="article-type">{article.type}</span>
-          <p className="article-author">{article.author.name}</p>
           <h1 className="article-headline">{article.headline}</h1>
+
+          <div className="article-author-row">
+            {article.author.avatar
+              ? <img src={article.author.avatar} className="article-avatar" alt="avatar" />
+              : <div className="article-avatar-placeholder">{article.author.name[0].toUpperCase()}</div>
+            }
+            <span className="article-author">{article.author.name}</span>
+          </div>
 
           {article.coverImage && (
             <img src={article.coverImage} alt="capa" className="article-cover" />
           )}
 
-          <div
-            className="article-text"
-            dangerouslySetInnerHTML={{ __html: article.body }}
-          />
+          <div className="article-text" dangerouslySetInnerHTML={{ __html: article.body }} />
 
           {article.sources && article.sources.filter(s => s.url).length > 0 && (
             <div className="sources-dropdown">
@@ -79,9 +83,7 @@ function Article() {
                 <ul className="sources-list">
                   {article.sources.filter(s => s.url).map((s, i) => (
                     <li key={i}>
-                      <a href={s.url} target="_blank" rel="noreferrer">
-                        {s.label || s.url}
-                      </a>
+                      <a href={s.url} target="_blank" rel="noreferrer">{s.label || s.url}</a>
                     </li>
                   ))}
                 </ul>
