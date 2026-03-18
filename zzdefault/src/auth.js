@@ -1,6 +1,6 @@
 // auth.js — autenticação com Supabase
 
-import supabase from "../supabase.js";
+import supabase from "./supabase.js";
 
 const SESSION_KEY = "fannon_session";
 
