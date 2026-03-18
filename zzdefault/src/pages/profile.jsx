@@ -41,6 +41,7 @@ function Profile() {
 
   async function handleAvatar(e) {
   const file = e.target.files[0];
+  console.log("arquivo:", file);
   if (!file) return;
   const base64 = await new Promise((res, rej) => {
     const reader = new FileReader();
@@ -48,15 +49,16 @@ function Profile() {
     reader.onerror = rej;
     reader.readAsDataURL(file);
   });
+  console.log("base64 gerado:", base64?.slice(0, 50));
   const result = await updateAvatar(session.username, base64);
+  console.log("resultado:", result);
   if (result.ok) {
     setSession(prev => ({ ...prev, avatar: base64 }));
     flash("Foto atualizada!");
   } else {
     flash("Erro ao salvar foto.", false);
   }
-  }
-
+}
   async function handleName() {
     if (!name.trim()) { flash("Nome não pode ser vazio.", false); return; }
     setLoading(true);
