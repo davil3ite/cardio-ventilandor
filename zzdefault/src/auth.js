@@ -5,7 +5,7 @@ import supabase from "../supabase.js";
 const SESSION_KEY = "fannon_session";
 
 const ADM_EMAILS = [
-  "johndoe@gmail.com", // troque pelo email real
+  "gasoline.sharply166@passfwd.com", // troque pelo email real
 ];
 
 export function sanitizeUsername(raw) {
