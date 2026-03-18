@@ -1,22 +1,26 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from 'react-router-dom'
 import { getSession, logout } from "../auth.js";
 import { getArticles, timeAgo } from "../articles.js";
 import "./css/hub.css";
 
-const INSTAGRAM_URL = "https://www.instagram.com/folha.alfa_news/";
+const INSTAGRAM_URL = "https://instagram.com/";
 
 function Layout() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const navigate = useNavigate()
+  const navigate = useNavigate();
   const [darkMode, setDarkMode] = useState(() => localStorage.getItem("fannon_theme") !== "light");
-  const session = getSession();
-  const articles = getArticles();
+  const [session, setSession] = useState(getSession());
+  const [articles, setArticles] = useState([]);
+
+  useEffect(() => {
+    getArticles().then(setArticles);
+  }, []);
 
   function handleLogout() {
     logout();
+    setSession(null);
     navigate('/');
-    window.location.reload();
   }
 
   function toggleTheme() {
@@ -105,8 +109,8 @@ function Layout() {
           <div className="articles-grid">
             {articles.map((a) => (
               <div className="article-card" key={a.id} onClick={() => navigate(`/article/${a.id}`)}>
-                {a.coverImage && (
-                  <div className="card-cover" style={{ backgroundImage: `url(${a.coverImage})` }} />
+                {a.cover_image && (
+                  <div className="card-cover" style={{ backgroundImage: `url(${a.cover_image})` }} />
                 )}
                 <div className="card-body">
                   <span className="card-type">{a.type}</span>
@@ -118,7 +122,7 @@ function Layout() {
                       : <div className="card-avatar-placeholder">{a.author.name[0].toUpperCase()}</div>
                     }
                     <span>{a.author.name}</span>
-                    <span>{timeAgo(a.createdAt)}</span>
+                    <span>{timeAgo(a.created_at)}</span>
                   </div>
                 </div>
               </div>

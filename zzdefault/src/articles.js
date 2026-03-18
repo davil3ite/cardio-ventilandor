@@ -1,49 +1,55 @@
-// articles.js — CRUD de artigos com localStorage
+// articles.js — CRUD de artigos com Supabase
 
-export function getArticles() {
-  return JSON.parse(localStorage.getItem("fannon_articles") || "[]");
+import supabase from "../supabase.js";
+
+export async function getArticles() {
+  const { data, error } = await supabase
+    .from("articles")
+    .select("*")
+    .order("created_at", { ascending: false });
+  if (error) return [];
+  return data;
 }
 
-function saveArticles(articles) {
-  localStorage.setItem("fannon_articles", JSON.stringify(articles));
+export async function getArticleById(id) {
+  const { data, error } = await supabase
+    .from("articles")
+    .select("*")
+    .eq("id", id)
+    .single();
+  if (error) return null;
+  return data;
 }
 
-export function createArticle({ type, headline, body, images, coverImage, sources, author }) {
-  const articles = getArticles();
-  const id = Date.now().toString();
-  const article = {
-    id,
+export async function createArticle({ type, headline, body, coverImage, images, sources, author }) {
+  const { data, error } = await supabase.from("articles").insert({
     type,
     headline,
     body,
-    images,       // array de { url, caption }
-    coverImage,   // url string
-    sources,      // array de { label, url }
-    author,       // { name, username }
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString(),
-  };
-  articles.unshift(article);
-  saveArticles(articles);
-  return article;
+    cover_image: coverImage,
+    sources,
+    author,
+  }).select().single();
+  if (error) return null;
+  return data;
 }
 
-export function updateArticle(id, fields) {
-  const articles = getArticles();
-  const idx = articles.findIndex((a) => a.id === id);
-  if (idx === -1) return null;
-  articles[idx] = { ...articles[idx], ...fields, updatedAt: new Date().toISOString() };
-  saveArticles(articles);
-  return articles[idx];
+export async function updateArticle(id, fields) {
+  const { data, error } = await supabase.from("articles").update({
+    type: fields.type,
+    headline: fields.headline,
+    body: fields.body,
+    cover_image: fields.coverImage,
+    sources: fields.sources,
+    author: fields.author,
+    updated_at: new Date().toISOString(),
+  }).eq("id", id).select().single();
+  if (error) return null;
+  return data;
 }
 
-export function deleteArticle(id) {
-  const articles = getArticles().filter((a) => a.id !== id);
-  saveArticles(articles);
-}
-
-export function getArticleById(id) {
-  return getArticles().find((a) => a.id === id) || null;
+export async function deleteArticle(id) {
+  await supabase.from("articles").delete().eq("id", id);
 }
 
 export function timeAgo(isoString) {

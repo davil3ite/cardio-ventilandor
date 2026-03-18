@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { getSession } from "../auth.js";
 import { getArticleById, deleteArticle } from "../articles.js";
@@ -10,25 +10,15 @@ function Article() {
   const session = getSession();
   const [darkMode, setDarkMode] = useState(() => localStorage.getItem("fannon_theme") !== "light");
   const [sourcesOpen, setSourcesOpen] = useState(false);
+  const [article, setArticle] = useState(null);
+  const [loading, setLoading] = useState(true);
 
-  const article = getArticleById(id);
-
-  if (!article) {
-    return (
-      <div className="theme-dark" style={{ display:"flex", alignItems:"center", justifyContent:"center", height:"100vh" }}>
-        <p style={{ color: "#555", fontFamily: "Syne, sans-serif" }}>Matéria não encontrada.</p>
-      </div>
-    );
-  }
-
-  const isAuthor = session && session.username === article.author.username;
-
-  function handleDelete() {
-    if (window.confirm("Tem certeza que quer deletar esta matéria?")) {
-      deleteArticle(id);
-      navigate("/");
-    }
-  }
+  useEffect(() => {
+    getArticleById(id).then(data => {
+      setArticle(data);
+      setLoading(false);
+    });
+  }, [id]);
 
   function toggleTheme() {
     setDarkMode(v => {
@@ -36,6 +26,27 @@ function Article() {
       localStorage.setItem("fannon_theme", next ? "dark" : "light");
       return next;
     });
+  }
+
+  if (loading) return (
+    <div className="theme-dark" style={{ display:"flex", alignItems:"center", justifyContent:"center", height:"100vh" }}>
+      <p style={{ color: "#555", fontFamily: "Syne, sans-serif" }}>Carregando...</p>
+    </div>
+  );
+
+  if (!article) return (
+    <div className="theme-dark" style={{ display:"flex", alignItems:"center", justifyContent:"center", height:"100vh" }}>
+      <p style={{ color: "#555", fontFamily: "Syne, sans-serif" }}>Matéria não encontrada.</p>
+    </div>
+  );
+
+  const isAuthor = session && session.username === article.author.username;
+
+  async function handleDelete() {
+    if (window.confirm("Tem certeza que quer deletar esta matéria?")) {
+      await deleteArticle(id);
+      navigate("/");
+    }
   }
 
   return (
@@ -68,8 +79,8 @@ function Article() {
             <span className="article-author">{article.author.name}</span>
           </div>
 
-          {article.coverImage && (
-            <img src={article.coverImage} alt="capa" className="article-cover" />
+          {article.cover_image && (
+            <img src={article.cover_image} alt="capa" className="article-cover" />
           )}
 
           <div className="article-text" dangerouslySetInnerHTML={{ __html: article.body }} />

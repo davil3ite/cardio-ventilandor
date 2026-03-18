@@ -32,7 +32,6 @@ function applyTag(tag) {
   const sel = window.getSelection();
   if (!sel || sel.rangeCount === 0 || sel.isCollapsed) return;
   const range = sel.getRangeAt(0);
-
   let node = sel.anchorNode;
   while (node) {
     if (node.nodeName === tag.toUpperCase()) {
@@ -43,7 +42,6 @@ function applyTag(tag) {
     }
     node = node.parentNode;
   }
-
   const wrapper = document.createElement(tag);
   try {
     range.surroundContents(wrapper);
@@ -51,7 +49,6 @@ function applyTag(tag) {
     wrapper.appendChild(range.extractContents());
     range.insertNode(wrapper);
   }
-
   const newRange = document.createRange();
   newRange.selectNodeContents(wrapper);
   sel.removeAllRanges();
@@ -75,6 +72,7 @@ function Write() {
   const [coverPreview, setCoverPreview] = useState("");
   const [sources, setSources] = useState([{ label: "", url: "" }]);
   const [error, setError] = useState("");
+  const [publishing, setPublishing] = useState(false);
   const bodyRef = useRef(null);
   const coverInputRef = useRef(null);
   const inlineInputRef = useRef(null);
@@ -83,16 +81,17 @@ function Write() {
   useEffect(() => {
     if (!session || session.type !== "adm") { navigate("/"); return; }
     if (id) {
-      const a = getArticleById(id);
-      if (a) {
-        setType(a.type);
-        setHeadline(a.headline);
-        setBody(a.body);
-        setCoverImage(a.coverImage || "");
-        setCoverPreview(a.coverImage || "");
-        setSources(a.sources.length ? a.sources : [{ label: "", url: "" }]);
-        if (bodyRef.current) bodyRef.current.innerHTML = a.body;
-      }
+      getArticleById(id).then(a => {
+        if (a) {
+          setType(a.type);
+          setHeadline(a.headline);
+          setBody(a.body);
+          setCoverImage(a.cover_image || "");
+          setCoverPreview(a.cover_image || "");
+          setSources(a.sources?.length ? a.sources : [{ label: "", url: "" }]);
+          if (bodyRef.current) bodyRef.current.innerHTML = a.body;
+        }
+      });
     }
   }, []);
 
@@ -104,9 +103,7 @@ function Write() {
     });
   }
 
-  function handleBodyChange() {
-    setBody(bodyRef.current.innerHTML);
-  }
+  function handleBodyChange() { setBody(bodyRef.current.innerHTML); }
 
   function handleFormat(e, tag) {
     e.preventDefault();
@@ -124,9 +121,7 @@ function Write() {
     setBody(bodyRef.current.innerHTML);
   }
 
-  function handleEditorBlur() {
-    savedSelRef.current = saveSelection();
-  }
+  function handleEditorBlur() { savedSelRef.current = saveSelection(); }
 
   async function handleCoverChange(e) {
     const file = e.target.files[0];
@@ -147,37 +142,33 @@ function Write() {
     e.target.value = "";
   }
 
-  function addSource() {
-    setSources((s) => [...s, { label: "", url: "" }]);
-  }
-
-  function removeSource(i) {
-    setSources((s) => s.filter((_, idx) => idx !== i));
-  }
-
+  function addSource() { setSources(s => [...s, { label: "", url: "" }]); }
+  function removeSource(i) { setSources(s => s.filter((_, idx) => idx !== i)); }
   function updateSource(i, field, value) {
-    setSources((s) => s.map((src, idx) => idx === i ? { ...src, [field]: value } : src));
+    setSources(s => s.map((src, idx) => idx === i ? { ...src, [field]: value } : src));
   }
 
-  function handlePublish() {
+  async function handlePublish() {
     if (!headline.trim()) { setError("A manchete é obrigatória."); return; }
     if (!body.trim() || body === "<br>") { setError("O texto é obrigatório."); return; }
 
+    setPublishing(true);
     const data = {
       type,
       headline: headline.trim(),
       body,
       coverImage,
       images: [],
-      sources: sources.filter((s) => s.url.trim()),
-      author: { name: session.name, username: session.username },
+      sources: sources.filter(s => s.url.trim()),
+      author: { name: session.name, username: session.username, avatar: session.avatar || "" },
     };
 
     if (id) {
-      updateArticle(id, data);
+      await updateArticle(id, data);
     } else {
-      createArticle(data);
+      await createArticle(data);
     }
+    setPublishing(false);
     navigate("/");
   }
 
@@ -205,33 +196,20 @@ function Write() {
           <div className="write-field">
             <label>Tipo</label>
             <div className="type-options">
-              {TYPES.map((t) => (
-                <button
-                  key={t}
-                  className={`type-btn ${type === t ? "active" : ""}`}
-                  onClick={() => setType(t)}
-                >{t}</button>
+              {TYPES.map(t => (
+                <button key={t} className={`type-btn ${type === t ? "active" : ""}`} onClick={() => setType(t)}>{t}</button>
               ))}
             </div>
           </div>
 
           <div className="write-field">
             <label>Manchete</label>
-            <input
-              type="text" placeholder="Título da matéria"
-              value={headline} onChange={(e) => { setHeadline(e.target.value); setError(""); }}
-            />
+            <input type="text" placeholder="Título da matéria" value={headline} onChange={e => { setHeadline(e.target.value); setError(""); }} />
           </div>
 
           <div className="write-field">
             <label>Imagem de capa</label>
-            <input
-              ref={coverInputRef}
-              type="file"
-              accept="image/*"
-              style={{ display: "none" }}
-              onChange={handleCoverChange}
-            />
+            <input ref={coverInputRef} type="file" accept="image/*" style={{ display: "none" }} onChange={handleCoverChange} />
             <button className="file-btn" onClick={() => coverInputRef.current.click()}>
               {coverPreview ? "Trocar imagem de capa" : "Escolher imagem de capa"}
             </button>
@@ -241,49 +219,27 @@ function Write() {
           <div className="write-field">
             <label>Texto</label>
             <div className="editor-toolbar">
-              <button onMouseDown={(e) => handleFormat(e, "b")}><b>B</b></button>
-              <button onMouseDown={(e) => handleFormat(e, "i")}><i>I</i></button>
-              <button onMouseDown={(e) => handleFormat(e, "u")}><u>U</u></button>
+              <button onMouseDown={e => handleFormat(e, "b")}><b>B</b></button>
+              <button onMouseDown={e => handleFormat(e, "i")}><i>I</i></button>
+              <button onMouseDown={e => handleFormat(e, "u")}><u>U</u></button>
               <span className="toolbar-sep" />
-              <button onMouseDown={(e) => handleAlign(e, "Left")}>⬅</button>
-              <button onMouseDown={(e) => handleAlign(e, "Center")}>☰</button>
-              <button onMouseDown={(e) => handleAlign(e, "Right")}>➡</button>
+              <button onMouseDown={e => handleAlign(e, "Left")}>⬅</button>
+              <button onMouseDown={e => handleAlign(e, "Center")}>☰</button>
+              <button onMouseDown={e => handleAlign(e, "Right")}>➡</button>
               <span className="toolbar-sep" />
-              <button onMouseDown={(e) => { e.preventDefault(); inlineInputRef.current.click(); }}>🖼</button>
-              <input
-                ref={inlineInputRef}
-                type="file"
-                accept="image/*"
-                style={{ display: "none" }}
-                onChange={handleInlineImage}
-              />
+              <button onMouseDown={e => { e.preventDefault(); inlineInputRef.current.click(); }}>🖼</button>
+              <input ref={inlineInputRef} type="file" accept="image/*" style={{ display: "none" }} onChange={handleInlineImage} />
             </div>
-            <div
-              ref={bodyRef}
-              className="editor-body"
-              contentEditable
-              suppressContentEditableWarning
-              onInput={handleBodyChange}
-              onBlur={handleEditorBlur}
-              data-placeholder="Escreva sua matéria aqui..."
-            />
+            <div ref={bodyRef} className="editor-body" contentEditable suppressContentEditableWarning onInput={handleBodyChange} onBlur={handleEditorBlur} data-placeholder="Escreva sua matéria aqui..." />
           </div>
 
           <div className="write-field">
             <label>Fontes <span className="optional">(opcional)</span></label>
             {sources.map((src, i) => (
               <div className="source-row" key={i}>
-                <input
-                  type="text" placeholder="Nome da fonte"
-                  value={src.label} onChange={(e) => updateSource(i, "label", e.target.value)}
-                />
-                <input
-                  type="text" placeholder="https://..."
-                  value={src.url} onChange={(e) => updateSource(i, "url", e.target.value)}
-                />
-                {sources.length > 1 && (
-                  <button className="remove-source" onClick={() => removeSource(i)}>✕</button>
-                )}
+                <input type="text" placeholder="Nome da fonte" value={src.label} onChange={e => updateSource(i, "label", e.target.value)} />
+                <input type="text" placeholder="https://..." value={src.url} onChange={e => updateSource(i, "url", e.target.value)} />
+                {sources.length > 1 && <button className="remove-source" onClick={() => removeSource(i)}>✕</button>}
               </div>
             ))}
             <button className="add-source" onClick={addSource}>+ Adicionar fonte</button>
@@ -291,8 +247,8 @@ function Write() {
 
           {error && <p className="write-error">{error}</p>}
 
-          <button className="publish-btn" onClick={handlePublish}>
-            {id ? "Salvar alterações" : "Publicar"}
+          <button className="publish-btn" onClick={handlePublish} disabled={publishing}>
+            {publishing ? "Publicando..." : id ? "Salvar alterações" : "Publicar"}
           </button>
         </div>
       </main>
