@@ -133,8 +133,6 @@ body { font-family: 'DM Sans', sans-serif; min-height: 100vh; }
 .theme-light .profile-save { background: #111; color: #fff; }
 .theme-light .profile-save:hover { background: #333; }
 
-.danger-zone { }
-
 .profile-delete {
   background: none; border: 1px solid #5a1a1a; color: #e05555;
   padding: 10px 20px; border-radius: 8px;

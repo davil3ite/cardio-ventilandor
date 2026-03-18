@@ -40,14 +40,21 @@ function Profile() {
   }
 
   async function handleAvatar(e) {
-    const file = e.target.files[0];
-    if (!file) return;
+  const file = e.target.files[0];
+  if (!file) return;
+  const base64 = await new Promise((res, rej) => {
     const reader = new FileReader();
-    reader.onload = async () => {
-      const result = await updateAvatar(session.username, reader.result);
-      if (result.ok) { setSession(result.session); flash("Foto atualizada!"); }
-    };
+    reader.onload = () => res(reader.result);
+    reader.onerror = rej;
     reader.readAsDataURL(file);
+  });
+  const result = await updateAvatar(session.username, base64);
+  if (result.ok) {
+    setSession(prev => ({ ...prev, avatar: base64 }));
+    flash("Foto atualizada!");
+  } else {
+    flash("Erro ao salvar foto.", false);
+  }
   }
 
   async function handleName() {
