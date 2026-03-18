@@ -141,7 +141,7 @@ function Profile() {
 
           {/* Avatar */}
           <div className="profile-section">
-            <label className="section-label">Foto de perfil</label>
+            <p className="section-label">Foto de perfil</p>
             <div className="avatar-row">
               {session.avatar
                 ? <img src={session.avatar} className="profile-avatar" alt="avatar" />
