@@ -168,7 +168,10 @@ export async function updateUsername(currentUsername, newUsername, password) {
 
 export async function updateAvatar(username, base64) {
   const users = await getUsers();
+  console.log("usuários:", users.map(u => u.username));
+  console.log("procurando por:", username);
   const idx = users.findIndex(u => u.username === username);
+  console.log("idx:", idx);
   if (idx === -1) return { ok: false };
   users[idx].avatar = base64;
   await saveUsers(users);
