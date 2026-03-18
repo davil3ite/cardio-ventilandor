@@ -1,6 +1,6 @@
 // articles.js — CRUD de artigos com Supabase
 
-import supabase from "../supabase.js";
+import supabase from "./supabase.js";
 
 export async function getArticles() {
   const { data, error } = await supabase
