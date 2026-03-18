@@ -54,8 +54,16 @@ async function hashPassword(password) {
 
 export async function getUsers() {
   const raw = localStorage.getItem(STORAGE_KEY);
+  console.log("raw do localStorage:", raw?.slice(0, 30));
   if (!raw) return [];
-  try { return await decrypt(raw); } catch { return []; }
+  try {
+    const users = await decrypt(raw);
+    console.log("users decriptados:", users.length);
+    return users;
+  } catch (e) {
+    console.log("erro ao decriptar:", e);
+    return [];
+  }
 }
 
 async function saveUsers(users) {
