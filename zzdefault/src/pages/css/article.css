@@ -44,14 +44,14 @@ body { font-family: 'DM Sans', sans-serif; min-height: 100vh; }
 .theme-light .theme-switch.on::after { background: #fff; }
 
 .article-content {
-  position: fixed; top: 64px; left: 0; right: 0; bottom: 0;
+  position: fixed; top: 64px; left: 0; right: 0; bottom: 48px;
   overflow-y: auto; display: flex; justify-content: center; padding: 40px 20px;
 }
 
 .article-body {
   width: 100%; max-width: 720px;
   display: flex; flex-direction: column; gap: 16px;
-  padding-bottom: 80px;
+  padding-bottom: 40px;
 }
 
 .article-cover {
@@ -59,32 +59,28 @@ body { font-family: 'DM Sans', sans-serif; min-height: 100vh; }
   border-radius: 12px; margin-bottom: 8px;
 }
 
-.article-type {
-  font-size: 10px; font-weight: 700; letter-spacing: 0.14em;
-  text-transform: uppercase; color: #555;
-}
+.article-type { font-size: 10px; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: #555; }
 .theme-light .article-type { color: #999; }
 
-.article-author {
-  font-size: 13px; color: #666; margin-top: -8px;
+.article-author-row { display: flex; align-items: center; gap: 10px; margin-top: -8px; }
+
+.article-avatar { width: 32px; height: 32px; border-radius: 50%; object-fit: cover; border: 1px solid #333; flex-shrink: 0; }
+
+.article-avatar-placeholder {
+  width: 32px; height: 32px; border-radius: 50%;
+  background: #222; border: 1px solid #333; color: #aaa;
+  font-size: 13px; font-weight: 600;
+  display: flex; align-items: center; justify-content: center;
+  font-family: 'DM Sans', sans-serif; flex-shrink: 0;
 }
+
+.article-author { font-size: 13px; color: #666; }
 .theme-light .article-author { color: #888; }
 
-.article-headline {
-  font-family: 'Syne', sans-serif; font-size: 36px; font-weight: 800;
-  color: #fff; line-height: 1.2; letter-spacing: 0.01em;
-}
+.article-headline { font-family: 'Syne', sans-serif; font-size: 36px; font-weight: 800; color: #fff; line-height: 1.2; letter-spacing: 0.01em; }
 .theme-light .article-headline { color: #111; }
 
-.article-meta {
-  font-size: 11px; color: #444; margin-top: -8px;
-}
-.theme-light .article-meta { color: #aaa; }
-
-.article-text {
-  font-size: 16px; line-height: 1.9; color: #ccc;
-  border-top: 1px solid #1a1a1a; padding-top: 24px; margin-top: 8px;
-}
+.article-text { font-size: 16px; line-height: 1.9; color: #ccc; border-top: 1px solid #1a1a1a; padding-top: 24px; margin-top: 8px; }
 .article-text img { max-width: 100%; border-radius: 8px; margin: 12px 0; }
 .theme-light .article-text { color: #333; border-top-color: #e0e0e0; }
 
@@ -103,19 +99,13 @@ body { font-family: 'DM Sans', sans-serif; min-height: 100vh; }
   display: flex; flex-direction: column; gap: 8px;
   padding: 16px; background: #111; border-radius: 8px; border: 1px solid #1a1a1a;
 }
-.sources-list a {
-  color: #aaa; font-size: 13px; text-decoration: underline;
-  transition: color 0.2s;
-}
+.sources-list a { color: #aaa; font-size: 13px; text-decoration: underline; transition: color 0.2s; }
 .sources-list a:hover { color: #fff; }
 .theme-light .sources-list { background: #fff; border-color: #e0e0e0; }
 .theme-light .sources-list a { color: #555; }
 .theme-light .sources-list a:hover { color: #111; }
 
-.author-actions {
-  display: flex; gap: 12px; margin-top: 16px;
-  padding-top: 24px; border-top: 1px solid #1a1a1a;
-}
+.author-actions { display: flex; gap: 12px; margin-top: 16px; padding-top: 24px; border-top: 1px solid #1a1a1a; }
 .theme-light .author-actions { border-top-color: #e0e0e0; }
 
 .btn-edit {
@@ -134,88 +124,27 @@ body { font-family: 'DM Sans', sans-serif; min-height: 100vh; }
 }
 .btn-delete:hover { background: rgba(224,85,85,0.08); border-color: #e05555; }
 
-/* Cole no final do article.css */
-
-.article-author-row {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  margin-top: -8px;
-}
-
-.article-avatar {
-  width: 32px; height: 32px;
-  border-radius: 50%;
-  object-fit: cover;
-  border: 1px solid #333;
-  flex-shrink: 0;
-}
-
-.article-avatar-placeholder {
-  width: 32px; height: 32px;
-  border-radius: 50%;
-  background: #222;
-  border: 1px solid #333;
-  color: #aaa;
-  font-size: 13px;
-  font-weight: 600;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-family: 'DM Sans', sans-serif;
-  flex-shrink: 0;
-}
-
-.article-author {
-  font-size: 13px;
-  color: #666;
-}
-.theme-light .article-author { color: #888; }
-
-/* Cole no final do hub.css, login.css, signup.css e article.css */
-
 .footer {
-  position: fixed;
-  bottom: 0; left: 0; right: 0;
-  height: 48px;
-  background: #000;
-  border-top: 1px solid #1a1a1a;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 0 32px;
-  z-index: 100;
+  position: fixed; bottom: 0; left: 0; right: 0; height: 48px;
+  background: #000; border-top: 1px solid #1a1a1a;
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0 32px; z-index: 100;
 }
 .theme-light .footer { background: #fff; border-top-color: #e0e0e0; }
 
 .footer-link {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  color: #666;
-  text-decoration: none;
-  font-family: 'DM Sans', sans-serif;
-  font-size: 13px;
-  transition: color 0.2s;
+  display: flex; align-items: center; gap: 8px;
+  color: #666; text-decoration: none;
+  font-family: 'DM Sans', sans-serif; font-size: 13px; transition: color 0.2s;
 }
 .footer-link:hover { color: #fff; }
 .theme-light .footer-link:hover { color: #111; }
 
-/* sidebar social — cole no final do hub.css */
-.sidebar-social {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 16px;
+.footer-center {
+  display: flex; align-items: center; gap: 10px;
+  position: absolute; left: 50%; transform: translateX(-50%);
 }
-
-.sidebar-icon {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: #666;
-  transition: color 0.2s;
-  padding: 4px;
-}
-.sidebar-icon:hover { color: #fff; }
-.theme-light .sidebar-icon:hover { color: #111; }
+.footer-dot { color: #333; font-size: 16px; }
+.theme-light .footer-dot { color: #ccc; }
+.footer-text { font-family: 'DM Sans', sans-serif; font-size: 13px; color: #666; }
+.theme-light .footer-text { color: #999; }

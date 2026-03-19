@@ -20,7 +20,6 @@ function Signup() {
     setForm(f => ({ ...f, [e.target.name]: value }));
     setError("");
   }
-
   useEffect(() => {
     if (!form.username) { setUsernameStatus(null); return; }
     setUsernameStatus("checking");
@@ -32,13 +31,8 @@ function Signup() {
   }, [form.username]);
 
   function toggleTheme() {
-    setDarkMode(v => {
-      const next = !v;
-      localStorage.setItem("fannon_theme", next ? "dark" : "light");
-      return next;
-    });
+    setDarkMode(v => { const next = !v; localStorage.setItem("fannon_theme", next ? "dark" : "light"); return next; });
   }
-
   async function handleSubmit() {
     if (!form.name || !form.username || !form.email || !form.password || !form.confirm) { setError("Preencha todos os campos."); return; }
     if (usernameStatus === "taken") { setError("Nome de usuário já existe."); return; }
@@ -121,13 +115,11 @@ function Signup() {
           </svg>
           <span>Siga-nos no Instagram</span>
         </a>
-        <a href={`mailto:${CONTACT_EMAIL}`} className="footer-link">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-            <rect x="2" y="4" width="20" height="16" rx="2"/>
-            <polyline points="2,4 12,13 22,4"/>
-          </svg>
-          <span>Contate-nos</span>
-        </a>
+        <div className="footer-center">
+          <a href={`mailto:${CONTACT_EMAIL}`} className="footer-link">{CONTACT_EMAIL}</a>
+          <span className="footer-dot">•</span>
+          <span className="footer-text">Contate-nos</span>
+        </div>
       </footer>
     </div>
   );

@@ -15,15 +15,9 @@ function Layout() {
   const [articles, setArticles] = useState([]);
 
   useEffect(() => { getArticles().then(setArticles); }, []);
-
   function handleLogout() { logout(); setSession(null); navigate('/'); }
-
   function toggleTheme() {
-    setDarkMode(v => {
-      const next = !v;
-      localStorage.setItem("fannon_theme", next ? "dark" : "light");
-      return next;
-    });
+    setDarkMode(v => { const next = !v; localStorage.setItem("fannon_theme", next ? "dark" : "light"); return next; });
   }
 
   return (
@@ -43,15 +37,10 @@ function Layout() {
           {session ? (
             <>
               <button className="header-profile-btn" onClick={() => navigate('/profile')}>
-                {session.avatar
-                  ? <img src={session.avatar} className="header-avatar" alt="avatar" />
-                  : <div className="header-avatar-placeholder">{session.name[0].toUpperCase()}</div>
-                }
+                {session.avatar ? <img src={session.avatar} className="header-avatar" alt="avatar" /> : <div className="header-avatar-placeholder">{session.name[0].toUpperCase()}</div>}
                 <span className="header-username">{session.name}</span>
               </button>
-              {session.type === "adm" && (
-                <button className="btn-write" onClick={() => navigate('/write')}>Escrever</button>
-              )}
+              {session.type === "adm" && <button className="btn-write" onClick={() => navigate('/write')}>Escrever</button>}
               <button className="btn-login" onClick={handleLogout}>Sair</button>
             </>
           ) : (
@@ -78,12 +67,8 @@ function Layout() {
                 <circle cx="17.5" cy="6.5" r="1" fill="currentColor" stroke="none"/>
               </svg>
             </a>
-            <a href={`mailto:${CONTACT_EMAIL}`} className="sidebar-icon">
-              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-                <rect x="2" y="4" width="20" height="16" rx="2"/>
-                <polyline points="2,4 12,13 22,4"/>
-              </svg>
-            </a>
+            <span className="sidebar-dot">•</span>
+            <a href={`mailto:${CONTACT_EMAIL}`} className="sidebar-email">{CONTACT_EMAIL}</a>
           </div>
           <div className="sidebar-logsign">
             {session ? (
@@ -106,9 +91,7 @@ function Layout() {
       </aside>
 
       <main className="page-content">
-        {articles.length === 0 ? (
-          <p className="page-hint"></p>
-        ) : (
+        {articles.length === 0 ? <p className="page-hint"></p> : (
           <div className="articles-grid">
             {articles.map((a) => (
               <div className="article-card" key={a.id} onClick={() => navigate(`/article/${a.id}`)}>
@@ -118,10 +101,7 @@ function Layout() {
                   <h2 className="card-headline">{a.headline}</h2>
                   <p className="card-excerpt">{a.body.replace(/<[^>]+>/g, '').slice(0, 120)}...</p>
                   <div className="card-meta">
-                    {a.author.avatar
-                      ? <img src={a.author.avatar} className="card-avatar" alt="avatar" />
-                      : <div className="card-avatar-placeholder">{a.author.name[0].toUpperCase()}</div>
-                    }
+                    {a.author.avatar ? <img src={a.author.avatar} className="card-avatar" alt="avatar" /> : <div className="card-avatar-placeholder">{a.author.name[0].toUpperCase()}</div>}
                     <span>{a.author.name}</span>
                     <span>{timeAgo(a.created_at)}</span>
                   </div>
@@ -141,13 +121,11 @@ function Layout() {
           </svg>
           <span>Siga-nos no Instagram</span>
         </a>
-        <a href={`mailto:${CONTACT_EMAIL}`} className="footer-link">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-            <rect x="2" y="4" width="20" height="16" rx="2"/>
-            <polyline points="2,4 12,13 22,4"/>
-          </svg>
-          <span>Contate-nos</span>
-        </a>
+        <div className="footer-center">
+          <a href={`mailto:${CONTACT_EMAIL}`} className="footer-link">{CONTACT_EMAIL}</a>
+          <span className="footer-dot">•</span>
+          <span className="footer-text">Contate-nos</span>
+        </div>
       </footer>
     </div>
   );
