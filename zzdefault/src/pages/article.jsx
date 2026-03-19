@@ -1,110 +1,81 @@
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
-import { register, isUsernameTaken, sanitizeUsername } from "../auth.js";
-import "./css/signup.css";
+import { useNavigate, useParams } from "react-router-dom";
+import { getSession } from "../auth.js";
+import { getArticleById, deleteArticle } from "../articles.js";
+import "./css/article.css";
 
 const INSTAGRAM_URL = "https://instagram.com/";
 const CONTACT_EMAIL = "johndoe@gmail.com";
 
-function Signup() {
+function Article() {
   const navigate = useNavigate();
+  const { id } = useParams();
+  const session = getSession();
   const [darkMode, setDarkMode] = useState(() => localStorage.getItem("fannon_theme") !== "light");
-  const [form, setForm] = useState({ name: "", username: "", email: "", password: "", confirm: "" });
-  const [usernameStatus, setUsernameStatus] = useState(null);
-  const [error, setError] = useState("");
-  const [loading, setLoading] = useState(false);
+  const [sourcesOpen, setSourcesOpen] = useState(false);
+  const [article, setArticle] = useState(null);
+  const [loading, setLoading] = useState(true);
 
-  function handleChange(e) {
-    let value = e.target.value;
-    if (e.target.name === "username") { value = sanitizeUsername(value); setUsernameStatus(null); }
-    setForm(f => ({ ...f, [e.target.name]: value }));
-    setError("");
-  }
-  useEffect(() => {
-    if (!form.username) { setUsernameStatus(null); return; }
-    setUsernameStatus("checking");
-    const t = setTimeout(async () => {
-      const taken = await isUsernameTaken(form.username);
-      setUsernameStatus(taken ? "taken" : "available");
-    }, 500);
-    return () => clearTimeout(t);
-  }, [form.username]);
-
+  useEffect(() => { getArticleById(id).then(data => { setArticle(data); setLoading(false); }); }, [id]);
   function toggleTheme() {
     setDarkMode(v => { const next = !v; localStorage.setItem("fannon_theme", next ? "dark" : "light"); return next; });
   }
-  async function handleSubmit() {
-    if (!form.name || !form.username || !form.email || !form.password || !form.confirm) { setError("Preencha todos os campos."); return; }
-    if (usernameStatus === "taken") { setError("Nome de usuário já existe."); return; }
-    if (usernameStatus === "checking") { setError("Aguarde a verificação do usuário."); return; }
-    if (form.password !== form.confirm) { setError("As senhas não coincidem."); return; }
-    if (form.password.length < 6) { setError("A senha precisa ter ao menos 6 caracteres."); return; }
-    setLoading(true);
-    const result = await register(form);
-    setLoading(false);
-    if (!result.ok) {
-      if (result.error === "username") setError("Nome de usuário já existe.");
-      else if (result.error === "email") setError("Este email já está cadastrado.");
-      else if (result.error === "username_invalid") setError("Nome de usuário inválido.");
-      return;
-    }
-    navigate("/login");
+
+  if (loading) return <div className="theme-dark" style={{ display:"flex", alignItems:"center", justifyContent:"center", height:"100vh" }}><p style={{ color: "#555", fontFamily: "Syne, sans-serif" }}>Carregando...</p></div>;
+  if (!article) return <div className="theme-dark" style={{ display:"flex", alignItems:"center", justifyContent:"center", height:"100vh" }}><p style={{ color: "#555", fontFamily: "Syne, sans-serif" }}>Matéria não encontrada.</p></div>;
+
+  const isAuthor = session && session.username === article.author.username;
+  async function handleDelete() {
+    if (window.confirm("Tem certeza que quer deletar esta matéria?")) { await deleteArticle(id); navigate("/"); }
   }
 
   return (
     <div className={darkMode ? "theme-dark" : "theme-light"}>
       <header className="header">
-        <div className="header-left" />
+        <div className="header-left">
+          <button className="btn-back" onClick={() => navigate("/")}>← Voltar</button>
+        </div>
         <div className="header-center">
           <button className="btn-logo" onClick={() => navigate("/")}>
             <img src="/logofannonmetalic.png" style={{ height: "65px", width: "auto" }} />
           </button>
         </div>
         <div className="header-right">
-          <button className="btn-login" onClick={() => navigate("/login")}>Login</button>
-          <button className="btn-signup active">Sign up</button>
+          <span className="theme-label">{darkMode ? "Escuro" : "Claro"}</span>
+          <button className={`theme-switch ${darkMode ? "on" : ""}`} onClick={toggleTheme} />
         </div>
       </header>
 
-      <main className="auth-content">
-        <div className="auth-card">
-          <h1 className="auth-title">Criar conta</h1>
-          <div className="auth-field">
-            <label>Nome</label>
-            <input type="text" name="name" placeholder="Seu nome" value={form.name} onChange={handleChange} />
+      <main className="article-content">
+        <div className="article-body">
+          <span className="article-type">{article.type}</span>
+          <h1 className="article-headline">{article.headline}</h1>
+          <div className="article-author-row">
+            {article.author.avatar ? <img src={article.author.avatar} className="article-avatar" alt="avatar" /> : <div className="article-avatar-placeholder">{article.author.name[0].toUpperCase()}</div>}
+            <span className="article-author">{article.author.name}</span>
           </div>
-          <div className="auth-field">
-            <label>Nome de usuário</label>
-            <div className="username-wrap">
-              <input type="text" name="username" placeholder="ex: joao_silva" value={form.username} onChange={handleChange} />
-              {usernameStatus === "checking" && <span className="ucheck checking">Verificando...</span>}
-              {usernameStatus === "available" && <span className="ucheck available">✓ Disponível</span>}
-              {usernameStatus === "taken" && <span className="ucheck taken">✗ Indisponível</span>}
+          {article.cover_image && <img src={article.cover_image} alt="capa" className="article-cover" />}
+          <div className="article-text" dangerouslySetInnerHTML={{ __html: article.body }} />
+          {article.sources && article.sources.filter(s => s.url).length > 0 && (
+            <div className="sources-dropdown">
+              <button className="sources-toggle" onClick={() => setSourcesOpen(v => !v)}>Fontes {sourcesOpen ? "▲" : "▼"}</button>
+              {sourcesOpen && (
+                <ul className="sources-list">
+                  {article.sources.filter(s => s.url).map((s, i) => (
+                    <li key={i}><a href={s.url} target="_blank" rel="noreferrer">{s.label || s.url}</a></li>
+                  ))}
+                </ul>
+              )}
             </div>
-            <span className="field-hint">Apenas letras minúsculas, números, hífens, pontos e underlines.</span>
-          </div>
-          <div className="auth-field">
-            <label>Email</label>
-            <input type="email" name="email" placeholder="seu@email.com" value={form.email} onChange={handleChange} />
-          </div>
-          <div className="auth-field">
-            <label>Senha</label>
-            <input type="password" name="password" placeholder="Mín. 6 caracteres" value={form.password} onChange={handleChange} />
-          </div>
-          <div className="auth-field">
-            <label>Confirmar senha</label>
-            <input type="password" name="confirm" placeholder="••••••••" value={form.confirm} onChange={handleChange} onKeyDown={e => e.key === "Enter" && handleSubmit()} />
-          </div>
-          {error && <p className="auth-error">{error}</p>}
-          <button className="auth-submit" onClick={handleSubmit} disabled={loading}>{loading ? "Criando conta..." : "Criar conta"}</button>
-          <p className="auth-switch">Já tem conta? <span onClick={() => navigate("/login")}>Entrar</span></p>
+          )}
+          {isAuthor && (
+            <div className="author-actions">
+              <button className="btn-edit" onClick={() => navigate(`/write/${id}`)}>Editar</button>
+              <button className="btn-delete" onClick={handleDelete}>Deletar</button>
+            </div>
+          )}
         </div>
       </main>
-
-      <div className="auth-theme">
-        <span className="theme-label">{darkMode ? "Escuro" : "Claro"}</span>
-        <button className={`theme-switch ${darkMode ? "on" : ""}`} onClick={toggleTheme} aria-label="Toggle theme" />
-      </div>
 
       <footer className="footer">
         <a href={INSTAGRAM_URL} target="_blank" rel="noreferrer" className="footer-link">
@@ -115,14 +86,13 @@ function Signup() {
           </svg>
           <span>Siga-nos no Instagram</span>
         </a>
-        <div className="footer-center">
-          <a href={`mailto:${CONTACT_EMAIL}`} className="footer-link">{CONTACT_EMAIL}</a>
-          <span className="footer-dot">•</span>
-          <span className="footer-text">Contate-nos</span>
-        </div>
+        <span className="footer-dot">•</span>
+        <span className="footer-text">{CONTACT_EMAIL}</span>
+        <span className="footer-dot">•</span>
+        <span className="footer-text">Contate-nos</span>
       </footer>
     </div>
   );
 }
 
-export default Signup;
+export default Article;

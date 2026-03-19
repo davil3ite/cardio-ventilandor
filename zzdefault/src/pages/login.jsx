@@ -72,11 +72,10 @@ function Login() {
           </svg>
           <span>Siga-nos no Instagram</span>
         </a>
-        <div className="footer-center">
-          <a href={`mailto:${CONTACT_EMAIL}`} className="footer-link">{CONTACT_EMAIL}</a>
-          <span className="footer-dot">•</span>
-          <span className="footer-text">Contate-nos</span>
-        </div>
+        <span className="footer-dot">•</span>
+        <span className="footer-text">{CONTACT_EMAIL}</span>
+        <span className="footer-dot">•</span>
+        <span className="footer-text">Contate-nos</span>
       </footer>
     </div>
   );
