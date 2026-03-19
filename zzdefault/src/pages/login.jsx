@@ -3,6 +3,9 @@ import { useNavigate } from "react-router-dom";
 import { login } from "../auth.js";
 import "./css/login.css";
 
+const INSTAGRAM_URL = "https://instagram.com/";
+const CONTACT_EMAIL = "johndoe@gmail.com";
+
 function Login() {
   const navigate = useNavigate();
   const [darkMode, setDarkMode] = useState(() => localStorage.getItem("fannon_theme") !== "light");
@@ -10,10 +13,7 @@ function Login() {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
-  function handleChange(e) {
-    setForm((f) => ({ ...f, [e.target.name]: e.target.value }));
-    setError("");
-  }
+  function handleChange(e) { setForm(f => ({ ...f, [e.target.name]: e.target.value })); setError(""); }
 
   function toggleTheme() {
     setDarkMode(v => {
@@ -24,17 +24,11 @@ function Login() {
   }
 
   async function handleSubmit() {
-    if (!form.email || !form.password) {
-      setError("Preencha todos os campos.");
-      return;
-    }
+    if (!form.email || !form.password) { setError("Preencha todos os campos."); return; }
     setLoading(true);
     const result = await login(form);
     setLoading(false);
-    if (!result.ok) {
-      setError("Email ou senha incorretos.");
-      return;
-    }
+    if (!result.ok) { setError("Email ou senha incorretos."); return; }
     navigate("/");
   }
 
@@ -56,46 +50,42 @@ function Login() {
       <main className="auth-content">
         <div className="auth-card">
           <h1 className="auth-title">Entrar</h1>
-
           <div className="auth-field">
             <label>Email</label>
-            <input
-              type="email" name="email" placeholder="seu@email.com"
-              value={form.email} onChange={handleChange}
-              onKeyDown={(e) => e.key === "Enter" && handleSubmit()}
-            />
+            <input type="email" name="email" placeholder="seu@email.com" value={form.email} onChange={handleChange} onKeyDown={e => e.key === "Enter" && handleSubmit()} />
           </div>
-
           <div className="auth-field">
             <label>Senha</label>
-            <input
-              type="password" name="password" placeholder="••••••••"
-              value={form.password} onChange={handleChange}
-              onKeyDown={(e) => e.key === "Enter" && handleSubmit()}
-            />
+            <input type="password" name="password" placeholder="••••••••" value={form.password} onChange={handleChange} onKeyDown={e => e.key === "Enter" && handleSubmit()} />
           </div>
-
           {error && <p className="auth-error">{error}</p>}
-
-          <button className="auth-submit" onClick={handleSubmit} disabled={loading}>
-            {loading ? "Entrando..." : "Entrar"}
-          </button>
-
-          <p className="auth-switch">
-            Não tem conta?{" "}
-            <span onClick={() => navigate("/signup")}>Criar conta</span>
-          </p>
+          <button className="auth-submit" onClick={handleSubmit} disabled={loading}>{loading ? "Entrando..." : "Entrar"}</button>
+          <p className="auth-switch">Não tem conta? <span onClick={() => navigate("/signup")}>Criar conta</span></p>
         </div>
       </main>
 
       <div className="auth-theme">
         <span className="theme-label">{darkMode ? "Escuro" : "Claro"}</span>
-        <button
-          className={`theme-switch ${darkMode ? "on" : ""}`}
-          onClick={toggleTheme}
-          aria-label="Toggle theme"
-        />
+        <button className={`theme-switch ${darkMode ? "on" : ""}`} onClick={toggleTheme} aria-label="Toggle theme" />
       </div>
+
+      <footer className="footer">
+        <a href={INSTAGRAM_URL} target="_blank" rel="noreferrer" className="footer-link">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+            <rect x="2" y="2" width="20" height="20" rx="5" ry="5"/>
+            <circle cx="12" cy="12" r="4"/>
+            <circle cx="17.5" cy="6.5" r="1" fill="currentColor" stroke="none"/>
+          </svg>
+          <span>Siga-nos no Instagram</span>
+        </a>
+        <a href={`mailto:${CONTACT_EMAIL}`} className="footer-link">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+            <rect x="2" y="4" width="20" height="16" rx="2"/>
+            <polyline points="2,4 12,13 22,4"/>
+          </svg>
+          <span>Contate-nos</span>
+        </a>
+      </footer>
     </div>
   );
 }

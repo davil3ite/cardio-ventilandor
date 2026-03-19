@@ -171,3 +171,51 @@ body { font-family: 'DM Sans', sans-serif; min-height: 100vh; }
   color: #666;
 }
 .theme-light .article-author { color: #888; }
+
+/* Cole no final do hub.css, login.css, signup.css e article.css */
+
+.footer {
+  position: fixed;
+  bottom: 0; left: 0; right: 0;
+  height: 48px;
+  background: #000;
+  border-top: 1px solid #1a1a1a;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 32px;
+  z-index: 100;
+}
+.theme-light .footer { background: #fff; border-top-color: #e0e0e0; }
+
+.footer-link {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #666;
+  text-decoration: none;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 13px;
+  transition: color 0.2s;
+}
+.footer-link:hover { color: #fff; }
+.theme-light .footer-link:hover { color: #111; }
+
+/* sidebar social — cole no final do hub.css */
+.sidebar-social {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+}
+
+.sidebar-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #666;
+  transition: color 0.2s;
+  padding: 4px;
+}
+.sidebar-icon:hover { color: #fff; }
+.theme-light .sidebar-icon:hover { color: #111; }

@@ -5,6 +5,7 @@ import { getArticles, timeAgo } from "../articles.js";
 import "./css/hub.css";
 
 const INSTAGRAM_URL = "https://instagram.com/";
+const CONTACT_EMAIL = "johndoe@gmail.com";
 
 function Layout() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -13,15 +14,9 @@ function Layout() {
   const [session, setSession] = useState(getSession());
   const [articles, setArticles] = useState([]);
 
-  useEffect(() => {
-    getArticles().then(setArticles);
-  }, []);
+  useEffect(() => { getArticles().then(setArticles); }, []);
 
-  function handleLogout() {
-    logout();
-    setSession(null);
-    navigate('/');
-  }
+  function handleLogout() { logout(); setSession(null); navigate('/'); }
 
   function toggleTheme() {
     setDarkMode(v => {
@@ -35,7 +30,7 @@ function Layout() {
     <div className={darkMode ? "theme-dark" : "theme-light"}>
       <header className="header">
         <div className="header-left">
-          <button className={`menu-btn ${sidebarOpen ? "open" : ""}`} onClick={() => setSidebarOpen((v) => !v)} aria-label="Toggle menu">
+          <button className={`menu-btn ${sidebarOpen ? "open" : ""}`} onClick={() => setSidebarOpen(v => !v)} aria-label="Toggle menu">
             <span/><span/><span/>
           </button>
         </div>
@@ -75,13 +70,21 @@ function Layout() {
           <button className="sidebar-home" onClick={() => navigate('/')}>Início</button>
         </div>
         <div className="sidebar-footer">
-          <a href={INSTAGRAM_URL} target="_blank" rel="noreferrer" className="sidebar-instagram">
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-              <rect x="2" y="2" width="20" height="20" rx="5" ry="5"/>
-              <circle cx="12" cy="12" r="4"/>
-              <circle cx="17.5" cy="6.5" r="1" fill="currentColor" stroke="none"/>
-            </svg>
-          </a>
+          <div className="sidebar-social">
+            <a href={INSTAGRAM_URL} target="_blank" rel="noreferrer" className="sidebar-icon">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                <rect x="2" y="2" width="20" height="20" rx="5" ry="5"/>
+                <circle cx="12" cy="12" r="4"/>
+                <circle cx="17.5" cy="6.5" r="1" fill="currentColor" stroke="none"/>
+              </svg>
+            </a>
+            <a href={`mailto:${CONTACT_EMAIL}`} className="sidebar-icon">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                <rect x="2" y="4" width="20" height="16" rx="2"/>
+                <polyline points="2,4 12,13 22,4"/>
+              </svg>
+            </a>
+          </div>
           <div className="sidebar-logsign">
             {session ? (
               <>
@@ -109,9 +112,7 @@ function Layout() {
           <div className="articles-grid">
             {articles.map((a) => (
               <div className="article-card" key={a.id} onClick={() => navigate(`/article/${a.id}`)}>
-                {a.cover_image && (
-                  <div className="card-cover" style={{ backgroundImage: `url(${a.cover_image})` }} />
-                )}
+                {a.cover_image && <div className="card-cover" style={{ backgroundImage: `url(${a.cover_image})` }} />}
                 <div className="card-body">
                   <span className="card-type">{a.type}</span>
                   <h2 className="card-headline">{a.headline}</h2>
@@ -132,14 +133,20 @@ function Layout() {
       </main>
 
       <footer className="footer">
-        <a href={INSTAGRAM_URL} target="_blank" rel="noreferrer" className="footer-instagram">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+        <a href={INSTAGRAM_URL} target="_blank" rel="noreferrer" className="footer-link">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
             <rect x="2" y="2" width="20" height="20" rx="5" ry="5"/>
             <circle cx="12" cy="12" r="4"/>
             <circle cx="17.5" cy="6.5" r="1" fill="currentColor" stroke="none"/>
           </svg>
-          <span className="footer-dot">•</span>
           <span>Siga-nos no Instagram</span>
+        </a>
+        <a href={`mailto:${CONTACT_EMAIL}`} className="footer-link">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+            <rect x="2" y="4" width="20" height="16" rx="2"/>
+            <polyline points="2,4 12,13 22,4"/>
+          </svg>
+          <span>Contate-nos</span>
         </a>
       </footer>
     </div>
