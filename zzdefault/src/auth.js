@@ -3,7 +3,7 @@ import supabase from "./supabase.js";
 const SESSION_KEY = "fannon_session";
 
 const ADM_EMAILS = [
-  
+  "flame.outtakes981@passfwd.com",
 ];
 
 const ADM_PLUS_EMAILS = [
