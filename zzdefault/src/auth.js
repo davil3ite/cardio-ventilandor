@@ -1,11 +1,13 @@
-// auth.js — autenticação com Supabase
-
 import supabase from "./supabase.js";
 
 const SESSION_KEY = "fannon_session";
 
 const ADM_EMAILS = [
-  "gasoline.sharply166@passfwd.com", // troque pelo email real
+  
+];
+
+const ADM_PLUS_EMAILS = [
+  "gasoline.sharply166@passfwd.com",
 ];
 
 export function sanitizeUsername(raw) {
@@ -38,8 +40,7 @@ export function logout() {
 
 export async function isUsernameTaken(username, excludeUsername = null) {
   const { data } = await supabase
-    .from("users")
-    .select("username")
+    .from("users").select("username")
     .eq("username", username.toLowerCase())
     .neq("username", excludeUsername || "");
   return data && data.length > 0;
@@ -47,8 +48,7 @@ export async function isUsernameTaken(username, excludeUsername = null) {
 
 export async function isEmailTaken(email, excludeEmail = null) {
   const { data } = await supabase
-    .from("users")
-    .select("email")
+    .from("users").select("email")
     .eq("email", email.toLowerCase())
     .neq("email", excludeEmail || "");
   return data && data.length > 0;
@@ -57,26 +57,18 @@ export async function isEmailTaken(email, excludeEmail = null) {
 export async function register({ name, username, email, password }) {
   const clean = sanitizeUsername(username);
   if (!isValidUsername(clean)) return { ok: false, error: "username_invalid" };
-
   const taken = await isUsernameTaken(clean);
   if (taken) return { ok: false, error: "username" };
-
   const emailTaken = await isEmailTaken(email);
   if (emailTaken) return { ok: false, error: "email" };
-
   const hashed = await hashPassword(password);
-  const type = ADM_EMAILS.includes(email.toLowerCase()) ? "adm" : "user";
-
+  let type = "user";
+  if (ADM_PLUS_EMAILS.includes(email.toLowerCase())) type = "adm+";
+  else if (ADM_EMAILS.includes(email.toLowerCase())) type = "adm";
   const { error } = await supabase.from("users").insert({
-    name,
-    username: clean,
-    email: email.toLowerCase(),
-    password: hashed,
-    type,
-    avatar: "",
-    username_changed_at: null,
+    name, username: clean, email: email.toLowerCase(),
+    password: hashed, type, avatar: "", username_changed_at: null,
   });
-
   if (error) return { ok: false, error: "server" };
   return { ok: true };
 }
@@ -84,21 +76,16 @@ export async function register({ name, username, email, password }) {
 export async function login({ email, password }) {
   const hashed = await hashPassword(password);
   const { data, error } = await supabase
-    .from("users")
-    .select("*")
+    .from("users").select("*")
     .eq("email", email.toLowerCase())
     .eq("password", hashed)
     .single();
-
   if (error || !data) return { ok: false };
   return { ok: true, user: saveSession(data) };
 }
 
-// ── Edição de perfil ───────────────────────────────────────────────
-
 export async function updateName(username, newName) {
-  const { error } = await supabase
-    .from("users").update({ name: newName }).eq("username", username);
+  const { error } = await supabase.from("users").update({ name: newName }).eq("username", username);
   if (error) return { ok: false };
   const session = getSession();
   const updated = { ...session, name: newName };
@@ -110,10 +97,8 @@ export async function updateEmail(username, newEmail, password) {
   const hashed = await hashPassword(password);
   const { data } = await supabase.from("users").select("password").eq("username", username).single();
   if (!data || data.password !== hashed) return { ok: false, error: "wrong_password" };
-
   const taken = await isEmailTaken(newEmail, getSession()?.email);
   if (taken) return { ok: false, error: "email_taken" };
-
   const { error } = await supabase.from("users").update({ email: newEmail.toLowerCase() }).eq("username", username);
   if (error) return { ok: false };
   const session = getSession();
@@ -135,25 +120,19 @@ export async function updatePassword(username, currentPassword, newPassword) {
 export async function updateUsername(currentUsername, newUsername, password) {
   const clean = sanitizeUsername(newUsername);
   if (!isValidUsername(clean)) return { ok: false, error: "username_invalid" };
-
   const hashed = await hashPassword(password);
   const { data } = await supabase.from("users").select("password, username_changed_at").eq("username", currentUsername).single();
   if (!data || data.password !== hashed) return { ok: false, error: "wrong_password" };
-
   if (data.username_changed_at) {
     const diff = Date.now() - new Date(data.username_changed_at).getTime();
     if (diff < 86400000) return { ok: false, error: "cooldown" };
   }
-
   const taken = await isUsernameTaken(clean, currentUsername);
   if (taken) return { ok: false, error: "username_taken" };
-
   const { error } = await supabase.from("users").update({
-    username: clean,
-    username_changed_at: new Date().toISOString(),
+    username: clean, username_changed_at: new Date().toISOString(),
   }).eq("username", currentUsername);
   if (error) return { ok: false };
-
   const session = getSession();
   const updated = { ...session, username: clean };
   localStorage.setItem(SESSION_KEY, JSON.stringify(updated));

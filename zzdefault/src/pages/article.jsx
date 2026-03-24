@@ -4,8 +4,8 @@ import { getSession } from "../auth.js";
 import { getArticleById, deleteArticle } from "../articles.js";
 import "./css/article.css";
 
-const INSTAGRAM_URL = "https://instagram.com/";
-const CONTACT_EMAIL = "johndoe@gmail.com";
+const INSTAGRAM_URL = "https://www.instagram.com/folha.alfa_news/";
+const CONTACT_EMAIL = "folhaalfanews@gmail.com";
 
 function Article() {
   const navigate = useNavigate();
@@ -17,6 +17,7 @@ function Article() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => { getArticleById(id).then(data => { setArticle(data); setLoading(false); }); }, [id]);
+
   function toggleTheme() {
     setDarkMode(v => { const next = !v; localStorage.setItem("fannon_theme", next ? "dark" : "light"); return next; });
   }
@@ -24,7 +25,11 @@ function Article() {
   if (loading) return <div className="theme-dark" style={{ display:"flex", alignItems:"center", justifyContent:"center", height:"100vh" }}><p style={{ color: "#555", fontFamily: "Syne, sans-serif" }}>Carregando...</p></div>;
   if (!article) return <div className="theme-dark" style={{ display:"flex", alignItems:"center", justifyContent:"center", height:"100vh" }}><p style={{ color: "#555", fontFamily: "Syne, sans-serif" }}>Matéria não encontrada.</p></div>;
 
-  const isAuthor = session && session.username === article.author.username;
+  const canEdit = session && (
+    session.username === article.author.username ||
+    session.type === "adm+"
+  );
+
   async function handleDelete() {
     if (window.confirm("Tem certeza que quer deletar esta matéria?")) { await deleteArticle(id); navigate("/"); }
   }
@@ -68,7 +73,7 @@ function Article() {
               )}
             </div>
           )}
-          {isAuthor && (
+          {canEdit && (
             <div className="author-actions">
               <button className="btn-edit" onClick={() => navigate(`/write/${id}`)}>Editar</button>
               <button className="btn-delete" onClick={handleDelete}>Deletar</button>
@@ -88,8 +93,6 @@ function Article() {
         </a>
         <span className="footer-dot">•</span>
         <span className="footer-text">{CONTACT_EMAIL}</span>
-        <span className="footer-dot">•</span>
-        <span className="footer-text">Contate-nos</span>
       </footer>
     </div>
   );

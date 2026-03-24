@@ -43,20 +43,12 @@ function applyTag(tag) {
     node = node.parentNode;
   }
   const wrapper = document.createElement(tag);
-  try {
-    range.surroundContents(wrapper);
-  } catch {
-    wrapper.appendChild(range.extractContents());
-    range.insertNode(wrapper);
-  }
+  try { range.surroundContents(wrapper); }
+  catch { wrapper.appendChild(range.extractContents()); range.insertNode(wrapper); }
   const newRange = document.createRange();
   newRange.selectNodeContents(wrapper);
   sel.removeAllRanges();
   sel.addRange(newRange);
-}
-
-function applyAlign(align) {
-  document.execCommand("justify" + align, false, null);
 }
 
 function Write() {
@@ -64,7 +56,6 @@ function Write() {
   const { id } = useParams();
   const session = getSession();
   const [darkMode, setDarkMode] = useState(() => localStorage.getItem("fannon_theme") !== "light");
-
   const [type, setType] = useState(TYPES[0]);
   const [headline, setHeadline] = useState("");
   const [body, setBody] = useState("");
@@ -79,15 +70,12 @@ function Write() {
   const savedSelRef = useRef(null);
 
   useEffect(() => {
-    if (!session || session.type !== "adm") { navigate("/"); return; }
+    if (!session || (session.type !== "adm" && session.type !== "adm+")) { navigate("/"); return; }
     if (id) {
       getArticleById(id).then(a => {
         if (a) {
-          setType(a.type);
-          setHeadline(a.headline);
-          setBody(a.body);
-          setCoverImage(a.cover_image || "");
-          setCoverPreview(a.cover_image || "");
+          setType(a.type); setHeadline(a.headline); setBody(a.body);
+          setCoverImage(a.cover_image || ""); setCoverPreview(a.cover_image || "");
           setSources(a.sources?.length ? a.sources : [{ label: "", url: "" }]);
           if (bodyRef.current) bodyRef.current.innerHTML = a.body;
         }
@@ -96,78 +84,51 @@ function Write() {
   }, []);
 
   function toggleTheme() {
-    setDarkMode(v => {
-      const next = !v;
-      localStorage.setItem("fannon_theme", next ? "dark" : "light");
-      return next;
-    });
+    setDarkMode(v => { const next = !v; localStorage.setItem("fannon_theme", next ? "dark" : "light"); return next; });
   }
-
   function handleBodyChange() { setBody(bodyRef.current.innerHTML); }
-
   function handleFormat(e, tag) {
-    e.preventDefault();
-    bodyRef.current.focus();
+    e.preventDefault(); bodyRef.current.focus();
     if (savedSelRef.current) restoreSelection(savedSelRef.current);
-    applyTag(tag);
-    setBody(bodyRef.current.innerHTML);
+    applyTag(tag); setBody(bodyRef.current.innerHTML);
   }
-
   function handleAlign(e, dir) {
-    e.preventDefault();
-    bodyRef.current.focus();
+    e.preventDefault(); bodyRef.current.focus();
     if (savedSelRef.current) restoreSelection(savedSelRef.current);
-    applyAlign(dir);
+    document.execCommand("justify" + dir, false, null);
     setBody(bodyRef.current.innerHTML);
   }
-
   function handleEditorBlur() { savedSelRef.current = saveSelection(); }
 
   async function handleCoverChange(e) {
-    const file = e.target.files[0];
-    if (!file) return;
+    const file = e.target.files[0]; if (!file) return;
     const base64 = await fileToBase64(file);
-    setCoverImage(base64);
-    setCoverPreview(base64);
+    setCoverImage(base64); setCoverPreview(base64);
   }
-
   async function handleInlineImage(e) {
-    const file = e.target.files[0];
-    if (!file) return;
+    const file = e.target.files[0]; if (!file) return;
     const base64 = await fileToBase64(file);
     bodyRef.current.focus();
     if (savedSelRef.current) restoreSelection(savedSelRef.current);
     document.execCommand("insertImage", false, base64);
-    setBody(bodyRef.current.innerHTML);
-    e.target.value = "";
+    setBody(bodyRef.current.innerHTML); e.target.value = "";
   }
 
   function addSource() { setSources(s => [...s, { label: "", url: "" }]); }
   function removeSource(i) { setSources(s => s.filter((_, idx) => idx !== i)); }
-  function updateSource(i, field, value) {
-    setSources(s => s.map((src, idx) => idx === i ? { ...src, [field]: value } : src));
-  }
+  function updateSource(i, field, value) { setSources(s => s.map((src, idx) => idx === i ? { ...src, [field]: value } : src)); }
 
   async function handlePublish() {
     if (!headline.trim()) { setError("A manchete é obrigatória."); return; }
     if (!body.trim() || body === "<br>") { setError("O texto é obrigatório."); return; }
-
     setPublishing(true);
     const data = {
-      type,
-      headline: headline.trim(),
-      body,
-      coverImage,
-      images: [],
+      type, headline: headline.trim(), body, coverImage, images: [],
       sources: sources.filter(s => s.url.trim()),
       author: { name: session.name, username: session.username, avatar: session.avatar || "" },
     };
-
-    if (id) {
-      await updateArticle(id, data);
-    } else {
-      await createArticle(data);
-    }
+    if (id) await updateArticle(id, data);
+    else await createArticle(data);
     setPublishing(false);
     navigate("/");
   }
@@ -192,21 +153,16 @@ function Write() {
       <main className="write-content">
         <div className="write-card">
           <h1 className="write-title">{id ? "Editar matéria" : "Nova matéria"}</h1>
-
           <div className="write-field">
             <label>Tipo</label>
             <div className="type-options">
-              {TYPES.map(t => (
-                <button key={t} className={`type-btn ${type === t ? "active" : ""}`} onClick={() => setType(t)}>{t}</button>
-              ))}
+              {TYPES.map(t => <button key={t} className={`type-btn ${type === t ? "active" : ""}`} onClick={() => setType(t)}>{t}</button>)}
             </div>
           </div>
-
           <div className="write-field">
             <label>Manchete</label>
             <input type="text" placeholder="Título da matéria" value={headline} onChange={e => { setHeadline(e.target.value); setError(""); }} />
           </div>
-
           <div className="write-field">
             <label>Imagem de capa</label>
             <input ref={coverInputRef} type="file" accept="image/*" style={{ display: "none" }} onChange={handleCoverChange} />
@@ -215,7 +171,6 @@ function Write() {
             </button>
             {coverPreview && <img src={coverPreview} alt="capa" className="cover-preview" />}
           </div>
-
           <div className="write-field">
             <label>Texto</label>
             <div className="editor-toolbar">
@@ -232,7 +187,6 @@ function Write() {
             </div>
             <div ref={bodyRef} className="editor-body" contentEditable suppressContentEditableWarning onInput={handleBodyChange} onBlur={handleEditorBlur} data-placeholder="Escreva sua matéria aqui..." />
           </div>
-
           <div className="write-field">
             <label>Fontes <span className="optional">(opcional)</span></label>
             {sources.map((src, i) => (
@@ -244,9 +198,7 @@ function Write() {
             ))}
             <button className="add-source" onClick={addSource}>+ Adicionar fonte</button>
           </div>
-
           {error && <p className="write-error">{error}</p>}
-
           <button className="publish-btn" onClick={handlePublish} disabled={publishing}>
             {publishing ? "Publicando..." : id ? "Salvar alterações" : "Publicar"}
           </button>

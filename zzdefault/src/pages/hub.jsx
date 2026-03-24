@@ -1,11 +1,11 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from 'react-router-dom'
 import { getSession, logout } from "../auth.js";
-import { getArticles, timeAgo } from "../articles.js";
+import { getArticles, deleteArticle, timeAgo } from "../articles.js";
 import "./css/hub.css";
 
-const INSTAGRAM_URL = "https://instagram.com/";
-const CONTACT_EMAIL = "johndoe@gmail.com";
+const INSTAGRAM_URL = "https://www.instagram.com/folha.alfa_news/";
+const CONTACT_EMAIL = "folhaalfanews@gmail.com";
 
 function Layout() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -15,9 +15,24 @@ function Layout() {
   const [articles, setArticles] = useState([]);
 
   useEffect(() => { getArticles().then(setArticles); }, []);
+
   function handleLogout() { logout(); setSession(null); navigate('/'); }
+
   function toggleTheme() {
     setDarkMode(v => { const next = !v; localStorage.setItem("fannon_theme", next ? "dark" : "light"); return next; });
+  }
+
+  async function handleDelete(e, id) {
+    e.stopPropagation();
+    if (window.confirm("Tem certeza que quer deletar esta matéria?")) {
+      await deleteArticle(id);
+      setArticles(prev => prev.filter(a => a.id !== id));
+    }
+  }
+
+  function canEdit(article) {
+    if (!session) return false;
+    return session.username === article.author.username || session.type === "adm+";
   }
 
   return (
@@ -40,7 +55,9 @@ function Layout() {
                 {session.avatar ? <img src={session.avatar} className="header-avatar" alt="avatar" /> : <div className="header-avatar-placeholder">{session.name[0].toUpperCase()}</div>}
                 <span className="header-username">{session.name}</span>
               </button>
-              {session.type === "adm" && <button className="btn-write" onClick={() => navigate('/write')}>Escrever</button>}
+              {(session.type === "adm" || session.type === "adm+") && (
+                <button className="btn-write" onClick={() => navigate('/write')}>Escrever</button>
+              )}
               <button className="btn-login" onClick={handleLogout}>Sair</button>
             </>
           ) : (
@@ -105,6 +122,16 @@ function Layout() {
                     <span>{a.author.name}</span>
                     <span>{timeAgo(a.created_at)}</span>
                   </div>
+                  {canEdit(a) && (
+                    <div className="card-actions" onClick={e => e.stopPropagation()}>
+                      <button className="card-action-btn" onClick={e => { e.stopPropagation(); navigate(`/write/${a.id}`); }} title="Editar">
+                        ✏️
+                      </button>
+                      <button className="card-action-btn delete" onClick={e => handleDelete(e, a.id)} title="Deletar">
+                        🗑️
+                      </button>
+                    </div>
+                  )}
                 </div>
               </div>
             ))}
@@ -123,8 +150,6 @@ function Layout() {
         </a>
         <span className="footer-dot">•</span>
         <span className="footer-text">{CONTACT_EMAIL}</span>
-        <span className="footer-dot">•</span>
-        <span className="footer-text">Contate-nos</span>
       </footer>
     </div>
   );

@@ -3,8 +3,8 @@ import { useNavigate } from "react-router-dom";
 import { register, isUsernameTaken, sanitizeUsername } from "../auth.js";
 import "./css/signup.css";
 
-const INSTAGRAM_URL = "https://instagram.com/";
-const CONTACT_EMAIL = "johndoe@gmail.com";
+const INSTAGRAM_URL = "https://www.instagram.com/folha.alfa_news/";
+const CONTACT_EMAIL = "folhaalfanews@gmail.com";
 
 function Signup() {
   const navigate = useNavigate();
