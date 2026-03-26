@@ -4,10 +4,26 @@ const SESSION_KEY = "fannon_session";
 
 const ADM_EMAILS = [
   "flame.outtakes981@passfwd.com",
+  "lorenzoalbuquerque29@gmail.com",
+  "lorenaccarrijo@gmail.com",
+  "lis.anandaca@gmail.com",
+  "ryansilvacosta002@gmail.com",
+  "janapbeuter@gmail.com",
+  "anagrego82@gmail.com",
+  "thiagomsilva2010@gmail.com",
+  "pinheiroheitor22@gmail.com",
+  "marialaurastarling416@gmail.com",
+  "themostpro505@gmail.com",
+  "isabellabartasson15@gmail.com",
+  "bungeesky@yahoo.com",
+  "zoriqbox@gmail.com",
 ];
 
 const ADM_PLUS_EMAILS = [
   "gasoline.sharply166@passfwd.com",
+  "profdunniahamdan@gmail.com",
+  "marcosfabiano536@gmail.com",
+  "joaoalexandretp@gmail.com",
 ];
 
 export function sanitizeUsername(raw) {
