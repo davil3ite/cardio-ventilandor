@@ -45,7 +45,7 @@ function Layout() {
         </div>
         <div className="header-center">
           <button className="btn-logo" disabled="true">
-            <img src="/logofanmetalic.png" style={{ height: "65px", width: "auto" }} />
+            <img src="/logofannonmetalic.png" style={{ height: "65px", width: "auto" }} />
           </button>
         </div>
         <div className="header-right">
@@ -110,30 +110,31 @@ function Layout() {
       <main className="page-content">
         {articles.length === 0 ? <p className="page-hint"></p> : (
           <div className="articles-grid">
-            <div className="articles-main">
-              {articles.map((a) => (
-                <div className="article-card" key={a.id} onClick={() => navigate(`/article/${a.id}`)}>
-                  {a.cover_image && <div className="card-cover" style={{ backgroundImage: `url(${a.cover_image})` }} />}
-                  <div className="card-body">
-                    <span className="card-type">{a.type}</span>
-                    <h2 className="card-headline">{a.headline}</h2>
-                    <p className="card-excerpt">{a.body.replace(/<[^>]+>/g, '').slice(0, 120)}...</p>
-                    <div className="card-meta">
-                      {a.author.avatar ? <img src={a.author.avatar} className="card-avatar" alt="avatar" /> : <div className="card-avatar-placeholder">{a.author.name[0].toUpperCase()}</div>}
-                      <span>{a.author.name}</span>
-                      <span>{timeAgo(a.created_at)}</span>
-                    </div>
-                    {canEdit(a) && (
-                      <div className="card-actions" onClick={e => e.stopPropagation()}>
-                        <button className="card-action-btn" onClick={e => { e.stopPropagation(); navigate(`/write/${a.id}`); }} title="Editar">✏️</button>
-                        <button className="card-action-btn delete" onClick={e => handleDelete(e, a.id)} title="Deletar">🗑️</button>
-                      </div>
-                    )}
+            {articles.map((a) => (
+              <div className="article-card" key={a.id} onClick={() => navigate(`/article/${a.id}`)}>
+                {a.cover_image && <div className="card-cover" style={{ backgroundImage: `url(${a.cover_image})` }} />}
+                <div className="card-body">
+                  <span className="card-type">{a.type}</span>
+                  <h2 className="card-headline">{a.headline}</h2>
+                  <p className="card-excerpt">{a.body.replace(/<[^>]+>/g, '').slice(0, 120)}...</p>
+                  <div className="card-meta">
+                    {a.author.avatar ? <img src={a.author.avatar} className="card-avatar" alt="avatar" /> : <div className="card-avatar-placeholder">{a.author.name[0].toUpperCase()}</div>}
+                    <span>{a.author.name}</span>
+                    <span>{timeAgo(a.created_at)}</span>
                   </div>
+                  {canEdit(a) && (
+                    <div className="card-actions" onClick={e => e.stopPropagation()}>
+                      <button className="card-action-btn" onClick={e => { e.stopPropagation(); navigate(`/write/${a.id}`); }} title="Editar">
+                        ✏️
+                      </button>
+                      <button className="card-action-btn delete" onClick={e => handleDelete(e, a.id)} title="Deletar">
+                        🗑️
+                      </button>
+                    </div>
+                  )}
                 </div>
-              ))}
-            </div>
-            <div className="articles-sidebar" />
+              </div>
+            ))}
           </div>
         )}
       </main>

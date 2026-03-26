@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { getSession } from "../auth.js";
-import { getArticleById, deleteArticle, getComments, addComment, deleteComment, timeAgo } from "../articles.js";
+import { getArticleById, deleteArticle } from "../articles.js";
 import "./css/article.css";
 
 const INSTAGRAM_URL = "https://www.instagram.com/folha.alfa_news/";
@@ -15,14 +15,8 @@ function Article() {
   const [sourcesOpen, setSourcesOpen] = useState(false);
   const [article, setArticle] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [comments, setComments] = useState([]);
-  const [commentText, setCommentText] = useState("");
-  const [posting, setPosting] = useState(false);
 
-  useEffect(() => {
-    getArticleById(id).then(data => { setArticle(data); setLoading(false); });
-    getComments(id).then(setComments);
-  }, [id]);
+  useEffect(() => { getArticleById(id).then(data => { setArticle(data); setLoading(false); }); }, [id]);
 
   function toggleTheme() {
     setDarkMode(v => { const next = !v; localStorage.setItem("fannon_theme", next ? "dark" : "light"); return next; });
@@ -32,31 +26,12 @@ function Article() {
   if (!article) return <div className="theme-dark" style={{ display:"flex", alignItems:"center", justifyContent:"center", height:"100vh" }}><p style={{ color: "#555", fontFamily: "Syne, sans-serif" }}>Matéria não encontrada.</p></div>;
 
   const canEdit = session && (
-    session.username === article.author.username || session.type === "adm+"
+    session.username === article.author.username ||
+    session.type === "adm+"
   );
 
   async function handleDelete() {
     if (window.confirm("Tem certeza que quer deletar esta matéria?")) { await deleteArticle(id); navigate("/"); }
-  }
-
-  async function handleComment() {
-    if (!commentText.trim() || !session) return;
-    setPosting(true);
-    const comment = await addComment({
-      articleId: id,
-      author: { name: session.name, username: session.username, avatar: session.avatar || "" },
-      content: commentText.trim(),
-    });
-    if (comment) {
-      setComments(prev => [...prev, comment]);
-      setCommentText("");
-    }
-    setPosting(false);
-  }
-
-  async function handleDeleteComment(commentId) {
-    await deleteComment(commentId);
-    setComments(prev => prev.filter(c => c.id !== commentId));
   }
 
   return (
@@ -86,7 +61,6 @@ function Article() {
           </div>
           {article.cover_image && <img src={article.cover_image} alt="capa" className="article-cover" />}
           <div className="article-text" dangerouslySetInnerHTML={{ __html: article.body }} />
-
           {article.sources && article.sources.filter(s => s.url).length > 0 && (
             <div className="sources-dropdown">
               <button className="sources-toggle" onClick={() => setSourcesOpen(v => !v)}>Fontes {sourcesOpen ? "▲" : "▼"}</button>
@@ -99,59 +73,10 @@ function Article() {
               )}
             </div>
           )}
-
           {canEdit && (
             <div className="author-actions">
               <button className="btn-edit" onClick={() => navigate(`/write/${id}`)}>Editar</button>
               <button className="btn-delete" onClick={handleDelete}>Deletar</button>
-            </div>
-          )}
-
-          {/* Comentários */}
-          {article.allow_comments !== false && (
-            <div className="comments-section">
-              <h3 className="comments-title">Comentários ({comments.length})</h3>
-
-              {session ? (
-                <div className="comment-input-row">
-                  {session.avatar ? <img src={session.avatar} className="comment-avatar" alt="avatar" /> : <div className="comment-avatar-placeholder">{session.name[0].toUpperCase()}</div>}
-                  <div className="comment-input-wrap">
-                    <textarea
-                      className="comment-input"
-                      placeholder="Escreva um comentário..."
-                      value={commentText}
-                      onChange={e => setCommentText(e.target.value)}
-                      rows={2}
-                    />
-                    <button className="comment-submit" onClick={handleComment} disabled={posting || !commentText.trim()}>
-                      {posting ? "Enviando..." : "Comentar"}
-                    </button>
-                  </div>
-                </div>
-              ) : (
-                <p className="comment-login-hint">
-                  <span onClick={() => navigate("/login")}>Faça login</span> para comentar.
-                </p>
-              )}
-
-              <div className="comments-list">
-                {comments.length === 0 && <p className="no-comments">Nenhum comentário ainda. Seja o primeiro!</p>}
-                {comments.map(c => (
-                  <div className="comment" key={c.id}>
-                    <div className="comment-header">
-                      {c.author.avatar ? <img src={c.author.avatar} className="comment-avatar" alt="avatar" /> : <div className="comment-avatar-placeholder">{c.author.name[0].toUpperCase()}</div>}
-                      <div className="comment-meta">
-                        <span className="comment-name">{c.author.name}</span>
-                        <span className="comment-time">{timeAgo(c.created_at)}</span>
-                      </div>
-                      {session?.type === "adm" || session?.type === "adm+" ? (
-                        <button className="comment-delete" onClick={() => handleDeleteComment(c.id)} title="Apagar comentário">✕</button>
-                      ) : null}
-                    </div>
-                    <p className="comment-content">{c.content}</p>
-                  </div>
-                ))}
-              </div>
             </div>
           )}
         </div>
