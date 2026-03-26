@@ -62,6 +62,7 @@ function Write() {
   const [coverImage, setCoverImage] = useState("");
   const [coverPreview, setCoverPreview] = useState("");
   const [sources, setSources] = useState([{ label: "", url: "" }]);
+  const [allowComments, setAllowComments] = useState(true);
   const [error, setError] = useState("");
   const [publishing, setPublishing] = useState(false);
   const bodyRef = useRef(null);
@@ -77,6 +78,7 @@ function Write() {
           setType(a.type); setHeadline(a.headline); setBody(a.body);
           setCoverImage(a.cover_image || ""); setCoverPreview(a.cover_image || "");
           setSources(a.sources?.length ? a.sources : [{ label: "", url: "" }]);
+          setAllowComments(a.allow_comments !== false);
           if (bodyRef.current) bodyRef.current.innerHTML = a.body;
         }
       });
@@ -126,6 +128,7 @@ function Write() {
       type, headline: headline.trim(), body, coverImage, images: [],
       sources: sources.filter(s => s.url.trim()),
       author: { name: session.name, username: session.username, avatar: session.avatar || "" },
+      allow_comments: allowComments,
     };
     if (id) await updateArticle(id, data);
     else await createArticle(data);
@@ -198,6 +201,19 @@ function Write() {
             ))}
             <button className="add-source" onClick={addSource}>+ Adicionar fonte</button>
           </div>
+
+          <div className="write-field">
+            <label className="checkbox-label">
+              <input
+                type="checkbox"
+                checked={allowComments}
+                onChange={e => setAllowComments(e.target.checked)}
+                className="checkbox-input"
+              />
+              Permitir comentários
+            </label>
+          </div>
+
           {error && <p className="write-error">{error}</p>}
           <button className="publish-btn" onClick={handlePublish} disabled={publishing}>
             {publishing ? "Publicando..." : id ? "Salvar alterações" : "Publicar"}

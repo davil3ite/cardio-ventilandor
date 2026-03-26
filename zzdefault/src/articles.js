@@ -1,11 +1,8 @@
-// articles.js — CRUD de artigos com Supabase
-
 import supabase from "./supabase.js";
 
 export async function getArticles() {
   const { data, error } = await supabase
-    .from("articles")
-    .select("*")
+    .from("articles").select("*")
     .order("created_at", { ascending: false });
   if (error) return [];
   return data;
@@ -13,22 +10,17 @@ export async function getArticles() {
 
 export async function getArticleById(id) {
   const { data, error } = await supabase
-    .from("articles")
-    .select("*")
-    .eq("id", id)
-    .single();
+    .from("articles").select("*").eq("id", id).single();
   if (error) return null;
   return data;
 }
 
-export async function createArticle({ type, headline, body, coverImage, images, sources, author }) {
+export async function createArticle({ type, headline, body, coverImage, images, sources, author, allow_comments }) {
   const { data, error } = await supabase.from("articles").insert({
-    type,
-    headline,
-    body,
+    type, headline, body,
     cover_image: coverImage,
-    sources,
-    author,
+    sources, author,
+    allow_comments: allow_comments ?? true,
   }).select().single();
   if (error) return null;
   return data;
@@ -42,6 +34,7 @@ export async function updateArticle(id, fields) {
     cover_image: fields.coverImage,
     sources: fields.sources,
     author: fields.author,
+    allow_comments: fields.allow_comments ?? true,
     updated_at: new Date().toISOString(),
   }).eq("id", id).select().single();
   if (error) return null;
@@ -50,6 +43,29 @@ export async function updateArticle(id, fields) {
 
 export async function deleteArticle(id) {
   await supabase.from("articles").delete().eq("id", id);
+}
+
+export async function getComments(articleId) {
+  const { data, error } = await supabase
+    .from("comments").select("*")
+    .eq("article_id", articleId)
+    .order("created_at", { ascending: true });
+  if (error) return [];
+  return data;
+}
+
+export async function addComment({ articleId, author, content }) {
+  const { data, error } = await supabase.from("comments").insert({
+    article_id: articleId,
+    author,
+    content,
+  }).select().single();
+  if (error) return null;
+  return data;
+}
+
+export async function deleteComment(id) {
+  await supabase.from("comments").delete().eq("id", id);
 }
 
 export function timeAgo(isoString) {

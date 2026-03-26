@@ -119,34 +119,71 @@ button { display: flex; align-items: center; justify-content: center; text-align
 }
 .page-hint { color: #333; font-family: 'Syne', sans-serif; font-size: 13px; letter-spacing: 0.08em; text-transform: uppercase; }
 
-.articles-grid { width: 100%; max-width: 860px; padding: 40px 20px; display: flex; flex-direction: column; gap: 24px; }
+/* Layout tipo G1 — coluna principal à esquerda com espaço à direita */
+.articles-grid {
+  width: 100%;
+  max-width: 1100px;
+  padding: 40px 20px;
+  display: grid;
+  grid-template-columns: 1fr 320px;
+  gap: 0 40px;
+  align-items: start;
+}
+
+.articles-main {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
 
 .article-card {
-  display: flex; flex-direction: row; border-radius: 12px; overflow: hidden;
-  border: 1px solid #1a1a1a; cursor: pointer; transition: border-color 0.2s, transform 0.2s; background: #111;
+  display: flex;
+  flex-direction: row;
+  border-bottom: 1px solid #1a1a1a;
+  cursor: pointer;
+  transition: background 0.15s;
+  background: transparent;
+  padding: 20px 0;
+  gap: 20px;
+  align-items: flex-start;
 }
-.article-card:hover { border-color: #444; transform: translateY(-2px); }
-.theme-light .article-card { background: #fff; border-color: #e0e0e0; }
-.theme-light .article-card:hover { border-color: #aaa; }
+.article-card:first-child { padding-top: 0; }
+.article-card:hover { background: rgba(255,255,255,0.02); }
+.theme-light .article-card { border-bottom-color: #e0e0e0; }
+.theme-light .article-card:hover { background: rgba(0,0,0,0.02); }
 
-.card-cover { width: 220px; min-height: 160px; flex-shrink: 0; background-size: cover; background-position: center; }
-.card-body { padding: 20px 24px; display: flex; flex-direction: column; gap: 8px; justify-content: center; }
+.card-cover {
+  width: 180px;
+  height: 120px;
+  flex-shrink: 0;
+  background-size: cover;
+  background-position: center;
+  border-radius: 6px;
+}
+
+.card-body {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  flex: 1;
+  min-width: 0;
+}
 
 .card-type { font-family: 'DM Sans', sans-serif; font-size: 10px; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; color: #555; }
 .theme-light .card-type { color: #999; }
 
-.card-headline { font-family: 'Syne', sans-serif; font-size: 20px; font-weight: 700; color: #f0f0f0; line-height: 1.3; }
+.card-headline { font-family: 'Syne', sans-serif; font-size: 18px; font-weight: 700; color: #f0f0f0; line-height: 1.3; }
 .theme-light .card-headline { color: #111; }
 
-.card-excerpt { font-size: 13px; color: #666; line-height: 1.6; }
+.card-excerpt { font-size: 13px; color: #666; line-height: 1.5; }
 
-.card-meta { display: flex; gap: 16px; font-size: 11px; color: #444; margin-top: 4px; align-items: center; }
+.card-meta { display: flex; gap: 10px; font-size: 11px; color: #444; margin-top: 4px; align-items: center; }
 .theme-light .card-meta { color: #aaa; }
 
-.card-avatar { width: 20px; height: 20px; border-radius: 50%; object-fit: cover; border: 1px solid #333; }
+.card-avatar { width: 18px; height: 18px; border-radius: 50%; object-fit: cover; border: 1px solid #333; }
 .card-avatar-placeholder {
-  width: 20px; height: 20px; border-radius: 50%; background: #222; border: 1px solid #333;
-  color: #aaa; font-size: 10px; font-weight: 600;
+  width: 18px; height: 18px; border-radius: 50%; background: #222; border: 1px solid #333;
+  color: #aaa; font-size: 9px; font-weight: 600;
   display: flex; align-items: center; justify-content: center;
   font-family: 'DM Sans', sans-serif; flex-shrink: 0;
 }
@@ -163,6 +200,12 @@ button { display: flex; align-items: center; justify-content: center; text-align
 .theme-light .card-action-btn { border-color: #ddd; }
 .theme-light .card-action-btn:hover { border-color: #999; background: #f0f0f0; }
 .theme-light .card-action-btn.delete:hover { border-color: #e05555; background: rgba(224,85,85,0.06); }
+
+/* Coluna lateral direita (placeholder) */
+.articles-sidebar {
+  position: sticky;
+  top: 80px;
+}
 
 .btn-write {
   background: none; border: 1px solid #555; color: #ccc;
