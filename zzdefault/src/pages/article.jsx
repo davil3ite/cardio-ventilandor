@@ -11,31 +11,23 @@ function Article() {
   const navigate = useNavigate();
   const { id } = useParams();
   const session = getSession();
-  const [darkMode, setDarkMode] = useState(() => localStorage.getItem("fannon_theme") !== "light");
   const [sourcesOpen, setSourcesOpen] = useState(false);
   const [article, setArticle] = useState(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => { getArticleById(id).then(data => { setArticle(data); setLoading(false); }); }, [id]);
 
-  function toggleTheme() {
-    setDarkMode(v => { const next = !v; localStorage.setItem("fannon_theme", next ? "dark" : "light"); return next; });
-  }
+  if (loading) return <div style={{ display:"flex", alignItems:"center", justifyContent:"center", height:"100vh", background:"#f5f5f5" }}><p style={{ color: "#aaa", fontFamily: "Syne, sans-serif" }}>Carregando...</p></div>;
+  if (!article) return <div style={{ display:"flex", alignItems:"center", justifyContent:"center", height:"100vh", background:"#f5f5f5" }}><p style={{ color: "#aaa", fontFamily: "Syne, sans-serif" }}>Matéria não encontrada.</p></div>;
 
-  if (loading) return <div className="theme-dark" style={{ display:"flex", alignItems:"center", justifyContent:"center", height:"100vh" }}><p style={{ color: "#555", fontFamily: "Syne, sans-serif" }}>Carregando...</p></div>;
-  if (!article) return <div className="theme-dark" style={{ display:"flex", alignItems:"center", justifyContent:"center", height:"100vh" }}><p style={{ color: "#555", fontFamily: "Syne, sans-serif" }}>Matéria não encontrada.</p></div>;
-
-  const canEdit = session && (
-    session.username === article.author.username ||
-    session.type === "adm+"
-  );
+  const canEdit = session && (session.username === article.author.username || session.type === "adm+");
 
   async function handleDelete() {
     if (window.confirm("Tem certeza que quer deletar esta matéria?")) { await deleteArticle(id); navigate("/"); }
   }
 
   return (
-    <div className={darkMode ? "theme-dark" : "theme-light"}>
+    <div>
       <header className="header">
         <div className="header-left">
           <button className="btn-back" onClick={() => navigate("/")}>← Voltar</button>
@@ -45,10 +37,7 @@ function Article() {
             <img src="/logofannonmetalic.png" style={{ height: "65px", width: "auto" }} />
           </button>
         </div>
-        <div className="header-right">
-          <span className="theme-label">{darkMode ? "Escuro" : "Claro"}</span>
-          <button className={`theme-switch ${darkMode ? "on" : ""}`} onClick={toggleTheme} />
-        </div>
+        <div className="header-right" />
       </header>
 
       <main className="article-content">

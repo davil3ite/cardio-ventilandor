@@ -8,7 +8,6 @@ import "./css/profile.css";
 
 function Profile() {
   const navigate = useNavigate();
-  const [darkMode, setDarkMode] = useState(() => localStorage.getItem("fannon_theme") !== "light");
   const [session, setSession] = useState(getSession());
   const avatarInputRef = useRef(null);
 
@@ -26,39 +25,25 @@ function Profile() {
 
   if (!session) { navigate("/"); return null; }
 
-  function toggleTheme() {
-    setDarkMode(v => {
-      const next = !v;
-      localStorage.setItem("fannon_theme", next ? "dark" : "light");
-      return next;
-    });
-  }
-
   function flash(text, ok = true) {
     setMsg({ text, ok });
     setTimeout(() => setMsg({ text: "", ok: true }), 3500);
   }
 
   async function handleAvatar(e) {
-  const file = e.target.files[0];
-  console.log("arquivo:", file);
-  if (!file) return;
-  const base64 = await new Promise((res, rej) => {
-    const reader = new FileReader();
-    reader.onload = () => res(reader.result);
-    reader.onerror = rej;
-    reader.readAsDataURL(file);
-  });
-  console.log("base64 gerado:", base64?.slice(0, 50));
-  const result = await updateAvatar(session.username, base64);
-  console.log("resultado:", result);
-  if (result.ok) {
-    setSession(prev => ({ ...prev, avatar: base64 }));
-    flash("Foto atualizada!");
-  } else {
-    flash("Erro ao salvar foto.", false);
+    const file = e.target.files[0];
+    if (!file) return;
+    const base64 = await new Promise((res, rej) => {
+      const reader = new FileReader();
+      reader.onload = () => res(reader.result);
+      reader.onerror = rej;
+      reader.readAsDataURL(file);
+    });
+    const result = await updateAvatar(session.username, base64);
+    if (result.ok) { setSession(prev => ({ ...prev, avatar: base64 })); flash("Foto atualizada!"); }
+    else flash("Erro ao salvar foto.", false);
   }
-}
+
   async function handleName() {
     if (!name.trim()) { flash("Nome não pode ser vazio.", false); return; }
     setLoading(true);
@@ -72,8 +57,7 @@ function Profile() {
     if (!email.trim() || !emailPw) { flash("Preencha o email e a senha.", false); return; }
     setLoading(true);
     const result = await updateEmail(session.username, email.trim(), emailPw);
-    setLoading(false);
-    setEmailPw("");
+    setLoading(false); setEmailPw("");
     if (result.ok) { setSession(result.session); flash("Email atualizado!"); }
     else if (result.error === "wrong_password") flash("Senha incorreta.", false);
     else if (result.error === "email_taken") flash("Este email já está em uso.", false);
@@ -86,8 +70,7 @@ function Profile() {
     if (newPw.length < 6) { flash("A nova senha precisa ter ao menos 6 caracteres.", false); return; }
     setLoading(true);
     const result = await updatePassword(session.username, currentPw, newPw);
-    setLoading(false);
-    setCurrentPw(""); setNewPw(""); setConfirmPw("");
+    setLoading(false); setCurrentPw(""); setNewPw(""); setConfirmPw("");
     if (result.ok) flash("Senha atualizada!");
     else if (result.error === "wrong_password") flash("Senha atual incorreta.", false);
     else flash("Erro ao atualizar senha.", false);
@@ -97,8 +80,7 @@ function Profile() {
     if (!newUsername.trim() || !usernamePw) { flash("Preencha o username e a senha.", false); return; }
     setLoading(true);
     const result = await updateUsername(session.username, newUsername.trim(), usernamePw);
-    setLoading(false);
-    setUsernamePw("");
+    setLoading(false); setUsernamePw("");
     if (result.ok) { setSession(result.session); flash("Username atualizado!"); }
     else if (result.error === "wrong_password") flash("Senha incorreta.", false);
     else if (result.error === "username_taken") flash("Username já em uso.", false);
@@ -119,7 +101,7 @@ function Profile() {
   }
 
   return (
-    <div className={darkMode ? "theme-dark" : "theme-light"}>
+    <div>
       <header className="header">
         <div className="header-left">
           <button className="btn-back" onClick={() => navigate("/")}>← Voltar</button>
@@ -129,26 +111,18 @@ function Profile() {
             <img src="/logofannonmetalic.png" style={{ height: "65px", width: "auto" }} />
           </button>
         </div>
-        <div className="header-right">
-          <span className="theme-label">{darkMode ? "Escuro" : "Claro"}</span>
-          <button className={`theme-switch ${darkMode ? "on" : ""}`} onClick={toggleTheme} />
-        </div>
+        <div className="header-right" />
       </header>
 
       <main className="profile-content">
         <div className="profile-card">
           <h1 className="profile-title">Meu Perfil</h1>
-
           {msg.text && <p className={`profile-msg ${msg.ok ? "ok" : "err"}`}>{msg.text}</p>}
 
-          {/* Avatar */}
           <div className="profile-section">
             <p className="section-label">Foto de perfil</p>
             <div className="avatar-row">
-              {session.avatar
-                ? <img src={session.avatar} className="profile-avatar" alt="avatar" />
-                : <div className="profile-avatar-placeholder">{session.name[0].toUpperCase()}</div>
-              }
+              {session.avatar ? <img src={session.avatar} className="profile-avatar" alt="avatar" /> : <div className="profile-avatar-placeholder">{session.name[0].toUpperCase()}</div>}
               <input ref={avatarInputRef} type="file" accept="image/*" style={{ display: "none" }} onChange={handleAvatar} />
               <button className="file-btn" onClick={() => avatarInputRef.current.click()}>
                 {session.avatar ? "Trocar foto" : "Adicionar foto"}
@@ -156,7 +130,6 @@ function Profile() {
             </div>
           </div>
 
-          {/* Nome */}
           <div className="profile-section">
             <label className="section-label">Nome</label>
             <div className="profile-row">
@@ -165,7 +138,6 @@ function Profile() {
             </div>
           </div>
 
-          {/* Username */}
           <div className="profile-section">
             <label className="section-label">Username <span className="section-hint">(1x a cada 24h)</span></label>
             <div className="profile-row">
@@ -175,7 +147,6 @@ function Profile() {
             </div>
           </div>
 
-          {/* Email */}
           <div className="profile-section">
             <label className="section-label">Email</label>
             <div className="profile-row">
@@ -185,7 +156,6 @@ function Profile() {
             </div>
           </div>
 
-          {/* Senha */}
           <div className="profile-section">
             <label className="section-label">Senha</label>
             <div className="profile-col">
@@ -196,15 +166,13 @@ function Profile() {
             </div>
           </div>
 
-          {/* Deletar conta */}
-          <div className="profile-section danger-zone">
+          <div className="profile-section">
             <label className="section-label danger">Deletar conta</label>
             <div className="profile-row">
               <input type="password" value={deletePw} onChange={e => setDeletePw(e.target.value)} placeholder="Digite sua senha para confirmar" />
               <button className="profile-delete" onClick={handleDelete} disabled={loading}>Deletar</button>
             </div>
           </div>
-
         </div>
       </main>
     </div>

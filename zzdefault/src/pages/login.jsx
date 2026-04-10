@@ -8,15 +8,12 @@ const CONTACT_EMAIL = "folhaalfanews@gmail.com";
 
 function Login() {
   const navigate = useNavigate();
-  const [darkMode, setDarkMode] = useState(() => localStorage.getItem("fannon_theme") !== "light");
   const [form, setForm] = useState({ email: "", password: "" });
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
   function handleChange(e) { setForm(f => ({ ...f, [e.target.name]: e.target.value })); setError(""); }
-  function toggleTheme() {
-    setDarkMode(v => { const next = !v; localStorage.setItem("fannon_theme", next ? "dark" : "light"); return next; });
-  }
+
   async function handleSubmit() {
     if (!form.email || !form.password) { setError("Preencha todos os campos."); return; }
     setLoading(true);
@@ -27,7 +24,7 @@ function Login() {
   }
 
   return (
-    <div className={darkMode ? "theme-dark" : "theme-light"}>
+    <div>
       <header className="header">
         <div className="header-left" />
         <div className="header-center">
@@ -57,11 +54,6 @@ function Login() {
           <p className="auth-switch">Não tem conta? <span onClick={() => navigate("/signup")}>Criar conta</span></p>
         </div>
       </main>
-
-      <div className="auth-theme">
-        <span className="theme-label">{darkMode ? "Escuro" : "Claro"}</span>
-        <button className={`theme-switch ${darkMode ? "on" : ""}`} onClick={toggleTheme} aria-label="Toggle theme" />
-      </div>
 
       <footer className="footer">
         <a href={INSTAGRAM_URL} target="_blank" rel="noreferrer" className="footer-link">

@@ -8,7 +8,6 @@ const CONTACT_EMAIL = "folhaalfanews@gmail.com";
 
 function Signup() {
   const navigate = useNavigate();
-  const [darkMode, setDarkMode] = useState(() => localStorage.getItem("fannon_theme") !== "light");
   const [form, setForm] = useState({ name: "", username: "", email: "", password: "", confirm: "" });
   const [usernameStatus, setUsernameStatus] = useState(null);
   const [error, setError] = useState("");
@@ -30,9 +29,6 @@ function Signup() {
     return () => clearTimeout(t);
   }, [form.username]);
 
-  function toggleTheme() {
-    setDarkMode(v => { const next = !v; localStorage.setItem("fannon_theme", next ? "dark" : "light"); return next; });
-  }
   async function handleSubmit() {
     if (!form.name || !form.username || !form.email || !form.password || !form.confirm) { setError("Preencha todos os campos."); return; }
     if (usernameStatus === "taken") { setError("Nome de usuário já existe."); return; }
@@ -52,7 +48,7 @@ function Signup() {
   }
 
   return (
-    <div className={darkMode ? "theme-dark" : "theme-light"}>
+    <div>
       <header className="header">
         <div className="header-left" />
         <div className="header-center">
@@ -101,11 +97,6 @@ function Signup() {
         </div>
       </main>
 
-      <div className="auth-theme">
-        <span className="theme-label">{darkMode ? "Escuro" : "Claro"}</span>
-        <button className={`theme-switch ${darkMode ? "on" : ""}`} onClick={toggleTheme} aria-label="Toggle theme" />
-      </div>
-
       <footer className="footer">
         <a href={INSTAGRAM_URL} target="_blank" rel="noreferrer" className="footer-link">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
@@ -117,8 +108,6 @@ function Signup() {
         </a>
         <span className="footer-dot">•</span>
         <span className="footer-text">{CONTACT_EMAIL}</span>
-        <span className="footer-dot">•</span>
-        <span className="footer-text">Contate-nos</span>
       </footer>
     </div>
   );

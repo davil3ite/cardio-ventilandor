@@ -10,17 +10,11 @@ const CONTACT_EMAIL = "folhaalfanews@gmail.com";
 function Layout() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const navigate = useNavigate();
-  const [darkMode, setDarkMode] = useState(() => localStorage.getItem("fannon_theme") !== "light");
   const [session, setSession] = useState(getSession());
   const [articles, setArticles] = useState([]);
 
   useEffect(() => { getArticles().then(setArticles); }, []);
-
   function handleLogout() { logout(); setSession(null); navigate('/'); }
-
-  function toggleTheme() {
-    setDarkMode(v => { const next = !v; localStorage.setItem("fannon_theme", next ? "dark" : "light"); return next; });
-  }
 
   async function handleDelete(e, id) {
     e.stopPropagation();
@@ -36,7 +30,7 @@ function Layout() {
   }
 
   return (
-    <div className={darkMode ? "theme-dark" : "theme-light"}>
+    <div>
       <header className="header">
         <div className="header-left">
           <button className={`menu-btn ${sidebarOpen ? "open" : ""}`} onClick={() => setSidebarOpen(v => !v)} aria-label="Toggle menu">
@@ -100,10 +94,6 @@ function Layout() {
               </>
             )}
           </div>
-          <div className="theme-div">
-            <span className="theme-label">{darkMode ? "Escuro" : "Claro"}</span>
-            <button className={`theme-switch ${darkMode ? "on" : ""}`} onClick={toggleTheme} aria-label="Toggle theme" />
-          </div>
         </div>
       </aside>
 
@@ -124,12 +114,8 @@ function Layout() {
                   </div>
                   {canEdit(a) && (
                     <div className="card-actions" onClick={e => e.stopPropagation()}>
-                      <button className="card-action-btn" onClick={e => { e.stopPropagation(); navigate(`/write/${a.id}`); }} title="Editar">
-                        ✏️
-                      </button>
-                      <button className="card-action-btn delete" onClick={e => handleDelete(e, a.id)} title="Deletar">
-                        🗑️
-                      </button>
+                      <button className="card-action-btn" onClick={e => { e.stopPropagation(); navigate(`/write/${a.id}`); }} title="Editar">✏️</button>
+                      <button className="card-action-btn delete" onClick={e => handleDelete(e, a.id)} title="Deletar">🗑️</button>
                     </div>
                   )}
                 </div>

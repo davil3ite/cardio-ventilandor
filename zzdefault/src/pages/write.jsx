@@ -55,7 +55,6 @@ function Write() {
   const navigate = useNavigate();
   const { id } = useParams();
   const session = getSession();
-  const [darkMode, setDarkMode] = useState(() => localStorage.getItem("fannon_theme") !== "light");
   const [type, setType] = useState(TYPES[0]);
   const [headline, setHeadline] = useState("");
   const [body, setBody] = useState("");
@@ -83,9 +82,6 @@ function Write() {
     }
   }, []);
 
-  function toggleTheme() {
-    setDarkMode(v => { const next = !v; localStorage.setItem("fannon_theme", next ? "dark" : "light"); return next; });
-  }
   function handleBodyChange() { setBody(bodyRef.current.innerHTML); }
   function handleFormat(e, tag) {
     e.preventDefault(); bodyRef.current.focus();
@@ -134,7 +130,7 @@ function Write() {
   }
 
   return (
-    <div className={darkMode ? "theme-dark" : "theme-light"}>
+    <div>
       <header className="header">
         <div className="header-left">
           <button className="btn-back" onClick={() => navigate("/")}>← Voltar</button>
@@ -144,10 +140,7 @@ function Write() {
             <img src="/logofannonmetalic.png" style={{ height: "65px", width: "auto" }} />
           </button>
         </div>
-        <div className="header-right">
-          <span className="theme-label">{darkMode ? "Escuro" : "Claro"}</span>
-          <button className={`theme-switch ${darkMode ? "on" : ""}`} onClick={toggleTheme} />
-        </div>
+        <div className="header-right" />
       </header>
 
       <main className="write-content">

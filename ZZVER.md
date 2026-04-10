@@ -1,3 +1,8 @@
+# **v1.2.2:**
+
+*- Removed theme option, light mode default & only theme (all pages & their CSSs)*
+*- Added tags to each .jsx and .css for easier identification*
+
 # **v1.2.1:**
 
 *- Created profile page (profile.jsx; profile.css)*
