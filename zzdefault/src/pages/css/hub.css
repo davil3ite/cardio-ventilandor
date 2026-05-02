@@ -8,7 +8,7 @@ button { display: flex; align-items: center; justify-content: center; text-align
 
 .header {
   position: fixed; top: 0; left: 0; right: 0; z-index: 100;
-  background: #FF1E2D; border-bottom: 1px solid rgb(150, 23, 23);
+  background: #FF1E2D; border-bottom: 1px solid rgb(215, 41, 41);
   height: 64px; display: flex; align-items: center;
   justify-content: space-between; padding: 0 20px;
 }
@@ -23,7 +23,7 @@ button { display: flex; align-items: center; justify-content: center; text-align
   display: flex; align-items: center; justify-content: center; flex-direction: column; gap: 5px;
   transition: border-color 0.2s, background 0.2s;
 }
-.menu-btn:hover { border-color: rgb(150, 23, 23); background: rgb(150, 23, 23); }
+.menu-btn:hover { border-color: #FDF4F6; background: rgb(215, 41, 41); }
 .menu-btn span { display: block; width: 18px; height: 1.5px; background: #FDF4F6; transition: transform 0.3s, opacity 0.3s; transform-origin: center; }
 .menu-btn.open span:nth-child(1) { transform: translateY(6.5px) rotate(45deg); }
 .menu-btn.open span:nth-child(2) { opacity: 0; transform: scaleX(0); }
