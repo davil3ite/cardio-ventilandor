@@ -8,7 +8,7 @@ button { display: flex; align-items: center; justify-content: center; text-align
 
 .header {
   position: fixed; top: 0; left: 0; right: 0; z-index: 100;
-  background: #fff; border-bottom: 1px solid #e0e0e0;
+  background: #FF1E2D; border-bottom: 1px solid rgb(150, 23, 23);
   height: 64px; display: flex; align-items: center;
   justify-content: space-between; padding: 0 20px;
 }

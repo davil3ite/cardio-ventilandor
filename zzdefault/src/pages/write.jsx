@@ -137,7 +137,7 @@ function Write() {
         </div>
         <div className="header-center">
           <button className="btn-logo" onClick={() => navigate("/")}>
-            <img src="/logofannonmetalic.png" style={{ height: "65px", width: "auto" }} />
+            <img src="/logofanNEOsite.png" style={{ height: "65px", width: "auto" }} />
           </button>
         </div>
         <div className="header-right" />

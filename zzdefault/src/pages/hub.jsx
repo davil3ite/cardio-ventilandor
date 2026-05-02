@@ -39,7 +39,7 @@ function Layout() {
         </div>
         <div className="header-center">
           <button className="btn-logo" disabled="true">
-            <img src="/logofannonmetalic.png" style={{ height: "65px", width: "auto" }} />
+            <img src="/logofanNEOsite.png" style={{ height: "65px", width: "auto" }} />
           </button>
         </div>
         <div className="header-right">

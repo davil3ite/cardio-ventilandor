@@ -5,7 +5,7 @@ body { font-family: 'DM Sans', sans-serif; min-height: 100vh; background: #f5f5f
 
 .header {
   position: fixed; top: 0; left: 0; right: 0; z-index: 100;
-  background: #fff; border-bottom: 1px solid #e0e0e0;
+  background: #FF1E2D; border-bottom: 1px solid rgb(150, 23, 23);
   height: 64px; display: flex; align-items: center;
   justify-content: space-between; padding: 0 20px;
 }
