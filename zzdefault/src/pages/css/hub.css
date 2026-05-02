@@ -18,13 +18,13 @@ button { display: flex; align-items: center; justify-content: center; text-align
 .btn-logo { background: none; border: none; }
 
 .menu-btn {
-  background: none; border: 1px solid #ccc; color: #111;
+  background: none; border: 1px solid #FDF4F6; color: #FDF4F6;
   width: 40px; height: 40px; border-radius: 8px; cursor: pointer;
   display: flex; align-items: center; justify-content: center; flex-direction: column; gap: 5px;
   transition: border-color 0.2s, background 0.2s;
 }
-.menu-btn:hover { border-color: #999; background: #f0f0f0; }
-.menu-btn span { display: block; width: 18px; height: 1.5px; background: #111; transition: transform 0.3s, opacity 0.3s; transform-origin: center; }
+.menu-btn:hover { border-color: rgb(150, 23, 23); background: rgb(150, 23, 23); }
+.menu-btn span { display: block; width: 18px; height: 1.5px; background: #FDF4F6; transition: transform 0.3s, opacity 0.3s; transform-origin: center; }
 .menu-btn.open span:nth-child(1) { transform: translateY(6.5px) rotate(45deg); }
 .menu-btn.open span:nth-child(2) { opacity: 0; transform: scaleX(0); }
 .menu-btn.open span:nth-child(3) { transform: translateY(-6.5px) rotate(-45deg); }
