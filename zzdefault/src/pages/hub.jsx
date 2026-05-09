@@ -30,7 +30,7 @@ function Layout() {
   }
 
   return (
-    <div>
+    <div className="layout">
       <header className="header">
         <div className="header-left">
           <button className={`menu-btn ${sidebarOpen ? "open" : ""}`} onClick={() => setSidebarOpen(v => !v)} aria-label="Toggle menu">
@@ -124,7 +124,6 @@ function Layout() {
           </div>
         )}
       </main>
-
       <footer className="footer">
         <a href={INSTAGRAM_URL} target="_blank" rel="noreferrer" className="footer-link">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">

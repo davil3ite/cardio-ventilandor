@@ -157,8 +157,6 @@ button { display: flex; align-items: center; justify-content: center; text-align
   justify-content: center;
   gap: 12px;
   padding: 0 32px;
-  width: 100% !important;
-  align-self: stretch !important;
 }
 
 .footer-link {
@@ -170,3 +168,9 @@ button { display: flex; align-items: center; justify-content: center; text-align
 
 .footer-dot { color: #ccc; font-size: 16px; }
 .footer-text { font-family: 'DM Sans', sans-serif; font-size: 13px; color: #888; }
+
+.layout {
+  min-height: 100vh !important;
+  display: flex !important;
+  flex-direction: column !important;
+}
