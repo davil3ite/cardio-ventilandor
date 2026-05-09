@@ -158,6 +158,7 @@ button { display: flex; align-items: center; justify-content: center; text-align
   display: flex; align-items: center; gap: 8px;
   color: #888; text-decoration: none;
   font-family: 'DM Sans', sans-serif; font-size: 13px; transition: color 0.2s;
+  width: 100% !important;
 }
 .footer-link:hover { color: #111; }
 
