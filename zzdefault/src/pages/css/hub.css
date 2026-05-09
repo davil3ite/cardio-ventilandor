@@ -152,13 +152,13 @@ button { display: flex; align-items: center; justify-content: center; text-align
   background: #fff; border-top: 1px solid #e0e0e0;
   display: flex; align-items: center; justify-content: center;
   gap: 12px; padding: 0 32px; z-index: 100;
+  width: 100% !important;
 }
 
 .footer-link {
   display: flex; align-items: center; gap: 8px;
   color: #888; text-decoration: none;
   font-family: 'DM Sans', sans-serif; font-size: 13px; transition: color 0.2s;
-  width: 100% !important;
 }
 .footer-link:hover { color: #111; }
 
