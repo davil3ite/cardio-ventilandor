@@ -56,7 +56,7 @@ function Layout() {
             </>
           ) : (
             <>
-              <button className="btn-login" onClick={() => navigate('/login')}>Login</button>
+              <button className="btn-login" onClick={() => navigate('/login')}>Entrar</button>
               <button className="btn-signup" onClick={() => navigate('/signup')}>Sign up</button>
             </>
           )}
