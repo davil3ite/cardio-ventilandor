@@ -8,9 +8,10 @@ button { display: flex; align-items: center; justify-content: center; text-align
 
 .header {
   position: fixed; top: 0; left: 0; right: 0; z-index: 100;
-  background: #1eff29; border-bottom: 1px solid rgb(215, 41, 41);
+  background: #FF1E2D; border-bottom: 1px solid rgb(215, 41, 41);
   height: 64px; display: flex; align-items: center;
   justify-content: space-between; padding: 0 20px;
+  z-index: 300 !important;
 }
 .header-left { display: flex; align-items: center; width: 160px; }
 .header-right { display: flex; align-items: center; gap: 10px; width: 160px; justify-content: flex-end; }
@@ -55,6 +56,7 @@ button { display: flex; align-items: center; justify-content: center; text-align
   position: fixed; top: 64px; left: 0; bottom: 0; width: 260px;
   background: #fff; border-right: 1px solid #e0e0e0; z-index: 95;
   transform: translateX(-100%); transition: transform 0.3s cubic-bezier(0.4,0,0.2,1);
+  z-index: 200 !important;
 }
 .sidebar.open { transform: translateX(0); }
 
@@ -146,7 +148,7 @@ button { display: flex; align-items: center; justify-content: center; text-align
 .sidebar-email:hover { color: #111; }
 
 .footer {
-  position: fixed; bottom: 0; left: 0; right: 0; height: 48px;
+  position: static !important; bottom: 0; left: 0; right: 0; height: 48px;
   background: #fff; border-top: 1px solid #e0e0e0;
   display: flex; align-items: center; justify-content: center;
   gap: 12px; padding: 0 32px; z-index: 100;
