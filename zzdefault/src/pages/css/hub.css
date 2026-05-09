@@ -158,6 +158,8 @@ button { display: flex; align-items: center; justify-content: center; text-align
   gap: 12px;
   padding: 0 32px;
   width: 100% !important;
+  margin-left: calc(-50vw + 50%) !important;
+  margin-right: calc(-50vw + 50%) !important;
 }
 
 .footer-link {
