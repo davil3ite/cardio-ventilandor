@@ -24,6 +24,7 @@ const ADM_PLUS_EMAILS = [
   "profdunniahamdan@gmail.com",
   "joaoalexandretp@gmail.com",
   "marcosfabiano536@gmail.com",
+  "nkm815401@gmail.com",
 ];
 
 export function sanitizeUsername(raw) {
