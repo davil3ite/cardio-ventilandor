@@ -17,6 +17,7 @@ const ADM_EMAILS = [
   "isabellabartasson15@gmail.com",
   "bungeesky@yahoo.com",
   "zoriqbox@gmail.com",
+  "loloccarrijo19@gmail.com",
 ];
 
 const ADM_PLUS_EMAILS = [
