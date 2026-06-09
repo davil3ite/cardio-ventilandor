@@ -89,7 +89,7 @@ button { display: flex; align-items: center; justify-content: center; text-align
 }
 .page-hint { color: #aaa; font-family: 'Syne', sans-serif; font-size: 13px; letter-spacing: 0.08em; text-transform: uppercase; }
 
-.articles-grid { width: 100%; max-width: 860px; padding: 40px 20px; display: flex; flex-direction: column; gap: 24px; }
+.articles-grid { width: 100%; max-width: 720px; padding: 40px 20px; display: flex; flex-direction: column; gap: 24px; margin: 0 auto; }
 
 .article-card {
   display: flex; flex-direction: row; border-radius: 12px; overflow: hidden;
