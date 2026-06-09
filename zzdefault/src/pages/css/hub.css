@@ -124,12 +124,12 @@ button { display: flex; align-items: center; justify-content: center; text-align
 .card-action-btn.delete:hover { border-color: #e05555; background: rgba(224,85,85,0.06); }
 
 .btn-write {
-  background: none; border: 1px solid #ccc; color: #444;
+  background: none; border: 1px solid #FDF4F6; color: #FDF4F6;
   padding: 8px 14px; border-radius: 8px;
   font-family: 'DM Sans', sans-serif; font-size: 10px; font-weight: 600; cursor: pointer;
   transition: border-color 0.2s, color 0.2s; letter-spacing: 0.02em;
 }
-.btn-write:hover { border-color: #111; color: #111; }
+.btn-write:hover { border-color: #FDF4F6; color: #FDF4F6; background-color: rgb(215, 41, 41);}
 
 .header-profile-btn { display: flex; align-items: center; gap: 6px; background: none; border: none; cursor: pointer; padding: 0; }
 .header-avatar { width: 28px; height: 28px; border-radius: 50%; object-fit: cover; border: 1px solid #ddd; }
