@@ -17,23 +17,12 @@ function fileToBase64(file) {
   });
 }
 
-function saveSelection() {
-  const sel = window.getSelection();
-  if (!sel || sel.rangeCount === 0) return null;
-  return sel.getRangeAt(0).cloneRange();
-}
-
-function restoreSelection(range) {
-  if (!range) return;
-  const sel = window.getSelection();
-  sel.removeAllRanges();
-  sel.addRange(range);
-}
-
-function applyTag(tag) {
+function applyFormat(tag) {
   const sel = window.getSelection();
   if (!sel || sel.rangeCount === 0 || sel.isCollapsed) return;
   const range = sel.getRangeAt(0);
+
+  // Verifica se já existe o tag no ancestral — se sim, remove
   let node = sel.anchorNode;
   while (node) {
     if (node.nodeName === tag.toUpperCase()) {
@@ -44,9 +33,14 @@ function applyTag(tag) {
     }
     node = node.parentNode;
   }
+
   const wrapper = document.createElement(tag);
-  try { range.surroundContents(wrapper); }
-  catch { wrapper.appendChild(range.extractContents()); range.insertNode(wrapper); }
+  try {
+    range.surroundContents(wrapper);
+  } catch {
+    wrapper.appendChild(range.extractContents());
+    range.insertNode(wrapper);
+  }
   const newRange = document.createRange();
   newRange.selectNodeContents(wrapper);
   sel.removeAllRanges();
@@ -79,7 +73,6 @@ function Write() {
   const bodyRef = useRef(null);
   const coverInputRef = useRef(null);
   const inlineInputRef = useRef(null);
-  const savedSelRef = useRef(null);
   const editionDropdownRef = useRef(null);
   const themeOverflowRef = useRef(null);
 
@@ -145,8 +138,6 @@ function Write() {
           setSelectedEdition(updated.length > 0 ? updated[0] : null);
       }
       setDeleteWarning(null);
-    } else if (deleteWarning !== null) {
-      setDeleteWarning(edId);
     } else {
       setDeleteWarning(edId);
     }
@@ -154,31 +145,41 @@ function Write() {
   }
 
   function handleBodyChange() { setBody(bodyRef.current.innerHTML); }
+
   function handleFormat(e, tag) {
-    e.preventDefault(); bodyRef.current.focus();
-    if (savedSelRef.current) restoreSelection(savedSelRef.current);
-    applyTag(tag); setBody(bodyRef.current.innerHTML);
+    e.preventDefault();
+    bodyRef.current.focus();
+    applyFormat(tag);
+    setBody(bodyRef.current.innerHTML);
   }
+
   function handleAlign(e, dir) {
-    e.preventDefault(); bodyRef.current.focus();
-    if (savedSelRef.current) restoreSelection(savedSelRef.current);
+    e.preventDefault();
+    bodyRef.current.focus();
     document.execCommand("justify" + dir, false, null);
     setBody(bodyRef.current.innerHTML);
   }
-  function handleEditorBlur() { savedSelRef.current = saveSelection(); }
+
+  function handlePaste(e) {
+    e.preventDefault();
+    const text = e.clipboardData.getData("text/plain");
+    document.execCommand("insertText", false, text);
+    setBody(bodyRef.current.innerHTML);
+  }
 
   async function handleCoverChange(e) {
     const file = e.target.files[0]; if (!file) return;
     const base64 = await fileToBase64(file);
     setCoverImage(base64); setCoverPreview(base64);
   }
+
   async function handleInlineImage(e) {
     const file = e.target.files[0]; if (!file) return;
     const base64 = await fileToBase64(file);
     bodyRef.current.focus();
-    if (savedSelRef.current) restoreSelection(savedSelRef.current);
     document.execCommand("insertImage", false, base64);
-    setBody(bodyRef.current.innerHTML); e.target.value = "";
+    setBody(bodyRef.current.innerHTML);
+    e.target.value = "";
   }
 
   function addSource() { setSources(s => [...s, { label: "", url: "" }]); }
@@ -363,7 +364,15 @@ function Write() {
               <button onMouseDown={e => { e.preventDefault(); inlineInputRef.current.click(); }}>🖼</button>
               <input ref={inlineInputRef} type="file" accept="image/*" style={{ display: "none" }} onChange={handleInlineImage} />
             </div>
-            <div ref={bodyRef} className="editor-body" contentEditable suppressContentEditableWarning onInput={handleBodyChange} onBlur={handleEditorBlur} data-placeholder="Escreva sua matéria aqui..." />
+            <div
+              ref={bodyRef}
+              className="editor-body"
+              contentEditable
+              suppressContentEditableWarning
+              onInput={handleBodyChange}
+              onPaste={handlePaste}
+              data-placeholder="Escreva sua matéria aqui..."
+            />
           </div>
 
           {/* Fontes */}

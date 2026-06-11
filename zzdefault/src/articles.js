@@ -86,9 +86,9 @@ export async function updateArticle(id, fields) {
     body: fields.body,
     cover_image: fields.coverImage,
     sources: fields.sources,
-    author: fields.author,
     edition_id: fields.editionId || null,
     updated_at: new Date().toISOString(),
+    // author não é atualizado intencionalmente
   }).eq("id", id).select().single();
   if (error) return null;
   return data;
