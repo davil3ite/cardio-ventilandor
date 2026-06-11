@@ -108,8 +108,8 @@ button { display: flex; align-items: center; justify-content: center; text-align
 
 .edition-separator-label {
   font-family: 'Syne', sans-serif;
-  font-size: clamp(28px, 5vw, 42px);
-  font-weight: 800;
+  font-size: clamp(16px, 3vw, 22px);
+  font-weight: 700;
   color: #111;
   letter-spacing: 0.04em;
   text-transform: uppercase;
