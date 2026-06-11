@@ -155,6 +155,24 @@ function Write() {
   function updateActiveFormats() {
     const sel = window.getSelection();
     if (!sel || sel.rangeCount === 0) return;
+
+    // Quando o cursor está parado (sem texto selecionado), o estado "real" de
+    // formatação para o próximo caractere digitado é dado por queryCommandState,
+    // que já reflete eventuais toggles feitos via execCommand antes de o DOM mudar.
+    // Usar a checagem de ancestrais aqui causava o botão "preso" no estado anterior
+    // até o usuário digitar algo.
+    if (sel.isCollapsed) {
+      setActiveFormats({
+        b: document.queryCommandState("bold"),
+        i: document.queryCommandState("italic"),
+        u: document.queryCommandState("underline"),
+      });
+      return;
+    }
+
+    // Quando há um trecho selecionado, a checagem de ancestrais reflete melhor
+    // a formatação efetivamente aplicada (inclusive a aplicada manualmente via
+    // surroundContents/unwrap em applyFormat).
     let node = sel.anchorNode;
     const active = { b: false, i: false, u: false };
     while (node && node !== bodyRef.current) {
@@ -164,9 +182,6 @@ function Write() {
       if (name === "u") active.u = true;
       node = node.parentNode;
     }
-    active.b = active.b || document.queryCommandState("bold");
-    active.i = active.i || document.queryCommandState("italic");
-    active.u = active.u || document.queryCommandState("underline");
     setActiveFormats(active);
   }
 
