@@ -58,7 +58,7 @@ button { display: flex; align-items: center; justify-content: center; text-align
 
 .sidebar {
   position: fixed; top: 64px; left: 0; bottom: 0; width: 260px;
-  background: #fff; border-right: 1px solid #e0e0e0; z-index: 95;
+  background: #fff; border-right: 1px solid #e0e0e0;
   transform: translateX(-100%); transition: transform 0.3s cubic-bezier(0.4,0,0.2,1);
   z-index: 200 !important;
 }
@@ -94,8 +94,43 @@ button { display: flex; align-items: center; justify-content: center; text-align
 
 .page-hint { color: #aaa; font-family: 'Syne', sans-serif; font-size: 13px; letter-spacing: 0.08em; text-transform: uppercase; }
 
-.articles-grid { max-width: 720px; width: 100%; padding: 40px 20px; display: flex; flex-direction: column; gap: 24px; }
+.articles-grid { max-width: 720px; width: 100%; padding: 40px 20px; display: flex; flex-direction: column; gap: 0; }
 
+/* ── Grupo por edição ── */
+.edition-group { display: flex; flex-direction: column; gap: 24px; margin-bottom: 24px; }
+.edition-group:last-child { margin-bottom: 0; }
+
+/* ── Separador de edição ── */
+.edition-separator {
+  display: flex; align-items: center; gap: 16px;
+  padding-top: 16px;
+}
+
+.edition-separator-label {
+  font-family: 'Syne', sans-serif;
+  font-size: clamp(28px, 5vw, 42px);
+  font-weight: 800;
+  color: #111;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  line-height: 1;
+}
+
+.edition-separator-line {
+  flex: 1;
+  height: 2px;
+  background: repeating-linear-gradient(
+    to right,
+    #ccc 0px,
+    #ccc 6px,
+    transparent 6px,
+    transparent 12px
+  );
+  border-radius: 1px;
+}
+
+/* ── Cards ── */
 .article-card {
   display: flex; flex-direction: row; border-radius: 12px; overflow: hidden;
   border: 1px solid #e0e0e0; cursor: pointer; transition: border-color 0.2s, transform 0.2s; background: #fff;

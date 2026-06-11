@@ -31,8 +31,70 @@ body { font-family: 'DM Sans', sans-serif; min-height: 100vh; background: #f5f5f
   padding-bottom: 60px;
 }
 
+/* Título + pill de edição lado a lado */
+.write-title-row {
+  display: flex; align-items: center; gap: 14px; flex-wrap: wrap;
+}
+
 .write-title { font-family: 'Syne', sans-serif; font-size: 28px; font-weight: 800; color: #111; letter-spacing: 0.04em; }
 
+/* ── Dropdown de edições ── */
+.edition-dropdown-wrap { position: relative; }
+
+.edition-pill {
+  display: flex; align-items: center; gap: 4px;
+  background: none; border: 1px solid #ddd; color: #666;
+  padding: 6px 12px; border-radius: 999px;
+  font-family: 'DM Sans', sans-serif; font-size: 12px; font-weight: 500;
+  cursor: pointer; transition: border-color 0.2s, color 0.2s;
+  white-space: nowrap;
+}
+.edition-pill:hover { border-color: #999; color: #111; }
+
+.edition-dropdown {
+  position: absolute; top: calc(100% + 6px); left: 0; z-index: 200;
+  background: #fff; border: 1px solid #ddd; border-radius: 10px;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.08);
+  min-width: 180px; overflow: hidden;
+  display: flex; flex-direction: column;
+}
+
+.edition-option {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 10px 14px; font-family: 'DM Sans', sans-serif; font-size: 13px;
+  color: #333; cursor: pointer; transition: background 0.15s; gap: 8px;
+}
+.edition-option:hover { background: #f5f5f5; }
+.edition-option.active { background: #f0f0f0; font-weight: 600; color: #111; }
+
+.edition-delete-btn {
+  background: none; border: 1px solid #ddd; color: #bbb;
+  width: 20px; height: 20px; border-radius: 4px; cursor: pointer;
+  font-size: 13px; flex-shrink: 0; font-weight: 700;
+  display: flex; align-items: center; justify-content: center;
+  transition: border-color 0.2s, color 0.2s, background 0.2s;
+  line-height: 1;
+}
+.edition-delete-btn:hover { border-color: #e05555; color: #e05555; }
+.edition-delete-btn.warn { border-color: #e05555; color: #fff; background: #e05555; }
+
+.edition-delete-warn {
+  font-family: 'DM Sans', sans-serif; font-size: 11px; color: #e05555;
+  padding: 8px 14px; background: rgba(224,85,85,0.06);
+  border-top: 1px solid rgba(224,85,85,0.15);
+  line-height: 1.4;
+}
+
+.edition-create-btn {
+  background: none; border: none; border-top: 1px solid #eee;
+  color: #888; padding: 10px 14px; font-family: 'DM Sans', sans-serif;
+  font-size: 12px; cursor: pointer; text-align: left;
+  transition: color 0.2s, background 0.15s; width: 100%;
+}
+.edition-create-btn:hover { color: #111; background: #f5f5f5; }
+.edition-create-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+/* ── Campos gerais ── */
 .write-field { display: flex; flex-direction: column; gap: 8px; }
 .write-field label { font-size: 11px; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: #888; }
 .optional { font-weight: 400; text-transform: none; letter-spacing: 0; color: #aaa; }
@@ -46,6 +108,7 @@ body { font-family: 'DM Sans', sans-serif; min-height: 100vh; background: #f5f5f
 .write-field input:focus { border-color: #999; }
 .write-field input::placeholder { color: #bbb; }
 
+/* ── Tipo e Tema (botões pill compartilhados) ── */
 .type-options { display: flex; flex-wrap: wrap; gap: 8px; }
 .type-btn {
   background: none; border: 1px solid #ddd; color: #888;
@@ -55,8 +118,31 @@ body { font-family: 'DM Sans', sans-serif; min-height: 100vh; background: #f5f5f
 .type-btn:hover { border-color: #999; color: #333; }
 .type-btn.active { border-color: #111; color: #111; background: #f0f0f0; }
 
+/* ── Overflow de temas ── */
+.theme-overflow-wrap { position: relative; }
+
+.theme-overflow-trigger { min-width: 48px; }
+
+.theme-overflow-dropdown {
+  position: absolute; top: calc(100% + 6px); left: 0; z-index: 200;
+  background: #fff; border: 1px solid #ddd; border-radius: 10px;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.08);
+  min-width: 140px; overflow: hidden;
+  display: flex; flex-direction: column;
+}
+
+.theme-overflow-item {
+  background: none; border: none; text-align: left;
+  padding: 10px 14px; font-family: 'DM Sans', sans-serif; font-size: 13px;
+  color: #333; cursor: pointer; transition: background 0.15s;
+}
+.theme-overflow-item:hover { background: #f5f5f5; }
+.theme-overflow-item.active { background: #f0f0f0; font-weight: 600; color: #111; }
+
+/* ── Imagem de capa ── */
 .cover-preview { width: 100%; max-height: 240px; object-fit: cover; border-radius: 8px; border: 1px solid #ddd; margin-top: 4px; }
 
+/* ── Editor ── */
 .editor-toolbar {
   display: flex; align-items: center; gap: 4px;
   background: #fff; border: 1px solid #ddd; border-bottom: none;
@@ -80,6 +166,7 @@ body { font-family: 'DM Sans', sans-serif; min-height: 100vh; background: #f5f5f
 .editor-body:empty::before { content: attr(data-placeholder); color: #bbb; pointer-events: none; }
 .editor-body img { max-width: 100%; border-radius: 6px; margin: 8px 0; }
 
+/* ── Fontes ── */
 .source-row { display: flex; gap: 8px; align-items: center; margin-bottom: 8px; }
 .source-row input { flex: 1; }
 .remove-source {
@@ -97,6 +184,7 @@ body { font-family: 'DM Sans', sans-serif; min-height: 100vh; background: #f5f5f
 }
 .add-source:hover { border-color: #999; color: #555; }
 
+/* ── Erro e publicar ── */
 .write-error { font-size: 12px; color: #e05555; background: rgba(224,85,85,0.08); border-radius: 6px; padding: 8px 12px; }
 
 .publish-btn {

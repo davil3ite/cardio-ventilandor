@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from 'react-router-dom'
 import { getSession, logout } from "../auth.js";
-import { getArticles, deleteArticle, timeAgo } from "../articles.js";
+import { getArticles, deleteArticle, timeAgo, getEditions } from "../articles.js";
 import "./css/hub.css";
 
 const INSTAGRAM_URL = "https://www.instagram.com/folha.alfa_news/";
@@ -12,8 +12,15 @@ function Layout() {
   const navigate = useNavigate();
   const [session, setSession] = useState(getSession());
   const [articles, setArticles] = useState([]);
+  const [editions, setEditions] = useState([]);
 
-  useEffect(() => { getArticles().then(setArticles); }, []);
+  useEffect(() => {
+    Promise.all([getArticles(), getEditions()]).then(([arts, eds]) => {
+      setArticles(arts);
+      setEditions(eds);
+    });
+  }, []);
+
   function handleLogout() { logout(); setSession(null); navigate('/'); }
 
   async function handleDelete(e, id) {
@@ -28,6 +35,37 @@ function Layout() {
     if (!session) return false;
     return session.username === article.author.username || session.type === "adm+";
   }
+
+  function groupByEdition(articles, editions) {
+    // Mapa id -> edition
+    const edMap = {};
+    editions.forEach(e => { edMap[e.id] = e; });
+
+    // Agrupa
+    const groups = {}; // edition_id (ou "__none__") -> { edition, articles[] }
+    articles.forEach(a => {
+      const key = a.edition_id || "__none__";
+      if (!groups[key]) {
+        groups[key] = {
+          edition: a.edition_id ? edMap[a.edition_id] : null,
+          articles: [],
+        };
+      }
+      groups[key].articles.push(a);
+    });
+
+    const sorted = Object.values(groups).sort((a, b) => {
+      if (!a.edition) return 1;
+      if (!b.edition) return -1;
+      return b.edition.number - a.edition.number;
+    });
+
+    return sorted;
+  }
+
+  const grouped = groupByEdition(articles, editions);
+  const hasMultipleEditions = grouped.filter(g => g.edition !== null).length > 1 ||
+    (grouped.length === 1 && grouped[0].edition !== null);
 
   return (
     <div className="layout">
@@ -100,30 +138,50 @@ function Layout() {
       <main className="page-content">
         {articles.length === 0 ? <p className="page-hint"></p> : (
           <div className="articles-grid">
-            {articles.map((a) => (
-              <div className="article-card" key={a.id} onClick={() => navigate(`/article/${a.id}`)}>
-                {a.cover_image && <div className="card-cover" style={{ backgroundImage: `url(${a.cover_image})` }} />}
-                <div className="card-body">
-                  <span className="card-type">{a.type}</span>
-                  <h2 className="card-headline">{a.headline}</h2>
-                  <p className="card-excerpt">{a.body.replace(/<[^>]+>/g, '').slice(0, 120)}...</p>
-                  <div className="card-meta">
-                    {a.author.avatar ? <img src={a.author.avatar} className="card-avatar" alt="avatar" /> : <div className="card-avatar-placeholder">{a.author.name[0].toUpperCase()}</div>}
-                    <span>{a.author.name}</span>
-                    <span>{timeAgo(a.created_at)}</span>
+            {grouped.map((group, gi) => (
+              <div key={gi} className="edition-group">
+
+                {/* Separador de edição — só aparece se houver mais de uma edição com artigos */}
+                {hasMultipleEditions && group.edition && (
+                  <div className="edition-separator">
+                    <span className="edition-separator-label">
+                      Edição {group.edition.number}
+                    </span>
+                    <span className="edition-separator-line" />
                   </div>
-                  {canEdit(a) && (
-                    <div className="card-actions" onClick={e => e.stopPropagation()}>
-                      <button className="card-action-btn" onClick={e => { e.stopPropagation(); navigate(`/write/${a.id}`); }} title="Editar">✏️</button>
-                      <button className="card-action-btn delete" onClick={e => handleDelete(e, a.id)} title="Deletar">🗑️</button>
+                )}
+
+                {group.articles.map((a) => (
+                  <div className="article-card" key={a.id} onClick={() => navigate(`/article/${a.id}`)}>
+                    {a.cover_image && <div className="card-cover" style={{ backgroundImage: `url(${a.cover_image})` }} />}
+                    <div className="card-body">
+                      <span className="card-type">
+                        {a.type}{a.theme ? ` • ${a.theme}` : ""}
+                      </span>
+                      <h2 className="card-headline">{a.headline}</h2>
+                      <p className="card-excerpt">{a.body.replace(/<[^>]+>/g, '').slice(0, 120)}...</p>
+                      <div className="card-meta">
+                        {a.author.avatar
+                          ? <img src={a.author.avatar} className="card-avatar" alt="avatar" />
+                          : <div className="card-avatar-placeholder">{a.author.name[0].toUpperCase()}</div>}
+                        <span>{a.author.name}</span>
+                        <span>{timeAgo(a.created_at)}</span>
+                      </div>
+                      {canEdit(a) && (
+                        <div className="card-actions" onClick={e => e.stopPropagation()}>
+                          <button className="card-action-btn" onClick={e => { e.stopPropagation(); navigate(`/write/${a.id}`); }} title="Editar">✏️</button>
+                          <button className="card-action-btn delete" onClick={e => handleDelete(e, a.id)} title="Deletar">🗑️</button>
+                        </div>
+                      )}
                     </div>
-                  )}
-                </div>
+                  </div>
+                ))}
               </div>
             ))}
           </div>
         )}
       </main>
+
       <footer className="footer">
         <a href={INSTAGRAM_URL} target="_blank" rel="noreferrer" className="footer-link">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
@@ -140,4 +198,4 @@ function Layout() {
   );
 }
 
-export default Layout
+export default Layout;

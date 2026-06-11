@@ -1,10 +1,12 @@
 import { useState, useRef, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { getSession } from "../auth.js";
-import { createArticle, updateArticle, getArticleById } from "../articles.js";
+import { createArticle, updateArticle, getArticleById, getEditions, createEdition, deleteEdition } from "../articles.js";
 import "./css/write.css";
 
 const TYPES = ["Notícia", "Reportagem", "Artigo de opinião", "Crônica"];
+const THEMES = ["Esportes", "Cultura", "Escola", "Mundo", "Ciência", "Tecnologia", "Saúde", "Arte"];
+const THEMES_VISIBLE = 6;
 
 function fileToBase64(file) {
   return new Promise((res, rej) => {
@@ -55,7 +57,10 @@ function Write() {
   const navigate = useNavigate();
   const { id } = useParams();
   const session = getSession();
+
   const [type, setType] = useState(TYPES[0]);
+  const [theme, setTheme] = useState(null);
+  const [themeOverflowOpen, setThemeOverflowOpen] = useState(false);
   const [headline, setHeadline] = useState("");
   const [body, setBody] = useState("");
   const [coverImage, setCoverImage] = useState("");
@@ -63,24 +68,90 @@ function Write() {
   const [sources, setSources] = useState([{ label: "", url: "" }]);
   const [error, setError] = useState("");
   const [publishing, setPublishing] = useState(false);
+
+  // Edições
+  const [editions, setEditions] = useState([]);
+  const [selectedEdition, setSelectedEdition] = useState(null);
+  const [editionDropdownOpen, setEditionDropdownOpen] = useState(false);
+  const [editionLoading, setEditionLoading] = useState(false);
+  const [deleteWarning, setDeleteWarning] = useState(null);
+
   const bodyRef = useRef(null);
   const coverInputRef = useRef(null);
   const inlineInputRef = useRef(null);
   const savedSelRef = useRef(null);
+  const editionDropdownRef = useRef(null);
+  const themeOverflowRef = useRef(null);
 
   useEffect(() => {
     if (!session || (session.type !== "adm" && session.type !== "adm+")) { navigate("/"); return; }
+    getEditions().then(eds => {
+      setEditions(eds);
+      if (eds.length > 0 && !id) setSelectedEdition(eds[0]);
+    });
     if (id) {
       getArticleById(id).then(a => {
         if (a) {
-          setType(a.type); setHeadline(a.headline); setBody(a.body);
-          setCoverImage(a.cover_image || ""); setCoverPreview(a.cover_image || "");
+          setType(a.type);
+          setTheme(a.theme || null);
+          setHeadline(a.headline);
+          setBody(a.body);
+          setCoverImage(a.cover_image || "");
+          setCoverPreview(a.cover_image || "");
           setSources(a.sources?.length ? a.sources : [{ label: "", url: "" }]);
           if (bodyRef.current) bodyRef.current.innerHTML = a.body;
+          if (a.edition_id) {
+            getEditions().then(eds => {
+              const ed = eds.find(e => e.id === a.edition_id);
+              if (ed) setSelectedEdition(ed);
+            });
+          }
         }
       });
     }
   }, []);
+
+  useEffect(() => {
+    function handleClickOutside(e) {
+      if (editionDropdownRef.current && !editionDropdownRef.current.contains(e.target))
+        setEditionDropdownOpen(false);
+      if (themeOverflowRef.current && !themeOverflowRef.current.contains(e.target))
+        setThemeOverflowOpen(false);
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  async function handleCreateEdition() {
+    setEditionLoading(true);
+    const ed = await createEdition();
+    if (ed) {
+      const updated = await getEditions();
+      setEditions(updated);
+      setSelectedEdition(ed);
+    }
+    setEditionLoading(false);
+    setEditionDropdownOpen(false);
+  }
+
+  async function handleDeleteEdition(e, edId) {
+    e.stopPropagation();
+    if (deleteWarning === edId) {
+      const result = await deleteEdition(edId);
+      if (result.ok) {
+        const updated = await getEditions();
+        setEditions(updated);
+        if (selectedEdition?.id === edId)
+          setSelectedEdition(updated.length > 0 ? updated[0] : null);
+      }
+      setDeleteWarning(null);
+    } else if (deleteWarning !== null) {
+      setDeleteWarning(edId);
+    } else {
+      setDeleteWarning(edId);
+    }
+    setTimeout(() => setDeleteWarning(v => v === edId ? null : v), 3000);
+  }
 
   function handleBodyChange() { setBody(bodyRef.current.innerHTML); }
   function handleFormat(e, tag) {
@@ -119,15 +190,25 @@ function Write() {
     if (!body.trim() || body === "<br>") { setError("O texto é obrigatório."); return; }
     setPublishing(true);
     const data = {
-      type, headline: headline.trim(), body, coverImage, images: [],
+      type,
+      theme,
+      headline: headline.trim(),
+      body,
+      coverImage,
+      images: [],
       sources: sources.filter(s => s.url.trim()),
       author: { name: session.name, username: session.username, avatar: session.avatar || "" },
+      editionId: selectedEdition?.id || null,
     };
     if (id) await updateArticle(id, data);
     else await createArticle(data);
     setPublishing(false);
     navigate("/");
   }
+
+  const visibleThemes = THEMES.slice(0, THEMES_VISIBLE);
+  const overflowThemes = THEMES.slice(THEMES_VISIBLE);
+  const isOverflowTheme = theme && overflowThemes.includes(theme);
 
   return (
     <div>
@@ -145,17 +226,119 @@ function Write() {
 
       <main className="write-content">
         <div className="write-card">
-          <h1 className="write-title">{id ? "Editar matéria" : "Nova matéria"}</h1>
+
+          {/* Título + dropdown de edição */}
+          <div className="write-title-row">
+            <h1 className="write-title">{id ? "Editar matéria" : "Nova matéria"}</h1>
+
+            {editions.length > 0 || session?.type === "adm+" ? (
+              <div className="edition-dropdown-wrap" ref={editionDropdownRef}>
+                <button
+                  className="edition-pill"
+                  onClick={() => setEditionDropdownOpen(v => !v)}
+                >
+                  {selectedEdition ? `Edição ${selectedEdition.number}` : "Sem edição"}
+                  <svg width="12" height="12" viewBox="0 0 12 12" fill="none" style={{ marginLeft: 4 }}>
+                    <path d="M2 4l4 4 4-4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                  </svg>
+                </button>
+
+                {editionDropdownOpen && (
+                  <div className="edition-dropdown">
+                    {editions.map(ed => (
+                      <div
+                        key={ed.id}
+                        className={`edition-option ${selectedEdition?.id === ed.id ? "active" : ""}`}
+                        onClick={() => { setSelectedEdition(ed); setEditionDropdownOpen(false); setDeleteWarning(null); }}
+                      >
+                        <span>Edição {ed.number}</span>
+                        {session?.type === "adm+" && (
+                          <button
+                            className={`edition-delete-btn ${deleteWarning === ed.id ? "warn" : ""}`}
+                            onClick={e => handleDeleteEdition(e, ed.id)}
+                            title={deleteWarning === ed.id ? "Clique novamente para confirmar" : "Apagar edição"}
+                          >
+                            {deleteWarning === ed.id ? "!" : "×"}
+                          </button>
+                        )}
+                      </div>
+                    ))}
+
+                    {deleteWarning && (
+                      <p className="edition-delete-warn">
+                        Apague todas as matérias desta edição antes de removê-la.
+                      </p>
+                    )}
+
+                    {session?.type === "adm+" && (
+                      <button
+                        className="edition-create-btn"
+                        onClick={handleCreateEdition}
+                        disabled={editionLoading}
+                      >
+                        {editionLoading ? "Criando..." : "+ Nova edição"}
+                      </button>
+                    )}
+                  </div>
+                )}
+              </div>
+            ) : null}
+          </div>
+
+          {/* Tipo */}
           <div className="write-field">
             <label>Tipo</label>
             <div className="type-options">
-              {TYPES.map(t => <button key={t} className={`type-btn ${type === t ? "active" : ""}`} onClick={() => setType(t)}>{t}</button>)}
+              {TYPES.map(t => (
+                <button key={t} className={`type-btn ${type === t ? "active" : ""}`} onClick={() => setType(t)}>{t}</button>
+              ))}
             </div>
           </div>
+
+          {/* Tema */}
+          <div className="write-field">
+            <label>Tema <span className="optional">(opcional)</span></label>
+            <div className="type-options" style={{ position: "relative" }}>
+              {visibleThemes.map(t => (
+                <button
+                  key={t}
+                  className={`type-btn ${theme === t ? "active" : ""}`}
+                  onClick={() => setTheme(theme === t ? null : t)}
+                >{t}</button>
+              ))}
+
+              {overflowThemes.length > 0 && (
+                <div className="theme-overflow-wrap" ref={themeOverflowRef}>
+                  <button
+                    className={`type-btn theme-overflow-trigger ${isOverflowTheme ? "active" : ""}`}
+                    onClick={() => setThemeOverflowOpen(v => !v)}
+                    title="Mais temas"
+                  >
+                    {isOverflowTheme ? theme : "···"}
+                  </button>
+                  {themeOverflowOpen && (
+                    <div className="theme-overflow-dropdown">
+                      {overflowThemes.map(t => (
+                        <button
+                          key={t}
+                          className={`theme-overflow-item ${theme === t ? "active" : ""}`}
+                          onClick={() => { setTheme(theme === t ? null : t); setThemeOverflowOpen(false); }}
+                        >{t}</button>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* Manchete */}
           <div className="write-field">
             <label>Manchete</label>
             <input type="text" placeholder="Título da matéria" value={headline} onChange={e => { setHeadline(e.target.value); setError(""); }} />
           </div>
+
+          {/* Imagem de capa */}
           <div className="write-field">
             <label>Imagem de capa</label>
             <input ref={coverInputRef} type="file" accept="image/*" style={{ display: "none" }} onChange={handleCoverChange} />
@@ -164,6 +347,8 @@ function Write() {
             </button>
             {coverPreview && <img src={coverPreview} alt="capa" className="cover-preview" />}
           </div>
+
+          {/* Texto */}
           <div className="write-field">
             <label>Texto</label>
             <div className="editor-toolbar">
@@ -180,6 +365,8 @@ function Write() {
             </div>
             <div ref={bodyRef} className="editor-body" contentEditable suppressContentEditableWarning onInput={handleBodyChange} onBlur={handleEditorBlur} data-placeholder="Escreva sua matéria aqui..." />
           </div>
+
+          {/* Fontes */}
           <div className="write-field">
             <label>Fontes <span className="optional">(opcional)</span></label>
             {sources.map((src, i) => (
@@ -191,6 +378,7 @@ function Write() {
             ))}
             <button className="add-source" onClick={addSource}>+ Adicionar fonte</button>
           </div>
+
           {error && <p className="write-error">{error}</p>}
           <button className="publish-btn" onClick={handlePublish} disabled={publishing}>
             {publishing ? "Publicando..." : id ? "Salvar alterações" : "Publicar"}
