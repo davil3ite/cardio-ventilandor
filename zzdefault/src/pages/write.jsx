@@ -19,10 +19,15 @@ function fileToBase64(file) {
 
 function applyFormat(tag) {
   const sel = window.getSelection();
-  if (!sel || sel.rangeCount === 0 || sel.isCollapsed) return;
+
+  if (!sel || sel.rangeCount === 0 || sel.isCollapsed) {
+    const commands = { b: "bold", i: "italic", u: "underline" };
+    if (commands[tag]) document.execCommand(commands[tag], false, null);
+    return;
+  }
+
   const range = sel.getRangeAt(0);
 
-  // Verifica se já existe o tag no ancestral — se sim, remove
   let node = sel.anchorNode;
   while (node) {
     if (node.nodeName === tag.toUpperCase()) {
@@ -62,6 +67,7 @@ function Write() {
   const [sources, setSources] = useState([{ label: "", url: "" }]);
   const [error, setError] = useState("");
   const [publishing, setPublishing] = useState(false);
+  const [activeFormats, setActiveFormats] = useState({ b: false, i: false, u: false });
 
   // Edições
   const [editions, setEditions] = useState([]);
@@ -146,11 +152,30 @@ function Write() {
 
   function handleBodyChange() { setBody(bodyRef.current.innerHTML); }
 
+  function updateActiveFormats() {
+    const sel = window.getSelection();
+    if (!sel || sel.rangeCount === 0) return;
+    let node = sel.anchorNode;
+    const active = { b: false, i: false, u: false };
+    while (node && node !== bodyRef.current) {
+      const name = node.nodeName?.toLowerCase();
+      if (name === "b" || name === "strong") active.b = true;
+      if (name === "i" || name === "em") active.i = true;
+      if (name === "u") active.u = true;
+      node = node.parentNode;
+    }
+    active.b = active.b || document.queryCommandState("bold");
+    active.i = active.i || document.queryCommandState("italic");
+    active.u = active.u || document.queryCommandState("underline");
+    setActiveFormats(active);
+  }
+
   function handleFormat(e, tag) {
     e.preventDefault();
     bodyRef.current.focus();
     applyFormat(tag);
     setBody(bodyRef.current.innerHTML);
+    setTimeout(updateActiveFormats, 0);
   }
 
   function handleAlign(e, dir) {
@@ -353,9 +378,18 @@ function Write() {
           <div className="write-field">
             <label>Texto</label>
             <div className="editor-toolbar">
-              <button onMouseDown={e => handleFormat(e, "b")}><b>B</b></button>
-              <button onMouseDown={e => handleFormat(e, "i")}><i>I</i></button>
-              <button onMouseDown={e => handleFormat(e, "u")}><u>U</u></button>
+              <button
+                className={activeFormats.b ? "active" : ""}
+                onMouseDown={e => handleFormat(e, "b")}
+              ><b>B</b></button>
+              <button
+                className={activeFormats.i ? "active" : ""}
+                onMouseDown={e => handleFormat(e, "i")}
+              ><i>I</i></button>
+              <button
+                className={activeFormats.u ? "active" : ""}
+                onMouseDown={e => handleFormat(e, "u")}
+              ><u>U</u></button>
               <span className="toolbar-sep" />
               <button onMouseDown={e => handleAlign(e, "Left")}>⬅</button>
               <button onMouseDown={e => handleAlign(e, "Center")}>☰</button>
@@ -371,6 +405,8 @@ function Write() {
               suppressContentEditableWarning
               onInput={handleBodyChange}
               onPaste={handlePaste}
+              onKeyUp={updateActiveFormats}
+              onMouseUp={updateActiveFormats}
               data-placeholder="Escreva sua matéria aqui..."
             />
           </div>
