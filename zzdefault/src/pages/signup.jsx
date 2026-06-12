@@ -1,3 +1,5 @@
+// signup.jsx
+
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { register, isUsernameTaken, sanitizeUsername } from "../auth.js";

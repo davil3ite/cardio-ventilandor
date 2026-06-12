@@ -1,3 +1,5 @@
+// auth.js
+
 import supabase from "./supabase.js";
 
 const SESSION_KEY = "fannon_session";

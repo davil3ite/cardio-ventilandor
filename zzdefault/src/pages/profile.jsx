@@ -1,3 +1,5 @@
+// profile.jsx
+
 import { useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import {
@@ -104,7 +106,7 @@ function Profile() {
     <div>
       <header className="header">
         <div className="header-left">
-          <button className="btn-back" onClick={() => navigate("/")}>← Voltar</button>
+          <button className="btn-back" onClick={() => navigate("/")}>◀</button>
         </div>
         <div className="header-center">
           <button className="btn-logo" onClick={() => navigate("/")}>

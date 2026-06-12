@@ -1,3 +1,5 @@
+// write.jsx
+
 import { useState, useRef, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { getSession } from "../auth.js";

@@ -1,7 +1,19 @@
+# **v1.3.0:**
+
+*- Moved articles cards to the center of the page*
+*- Added edition identification*
+*- Added theme identification*
+*- Changed color scheme (red, white & gray -> crimson, white & black)*
+*- Fixed refreshing & URL bug*
+*- Fixed authorship bug*
+*- Fixed formatting bug (including copy & paste bug)*
+*- Added textual genre identification*
+*- Added tags to each .jsx and .css for easier identification*
+*- Etc.*
+
 # **v1.2.2:**
 
 *- Removed theme option, light mode default & only theme (all pages & their CSSs)*
-*- Added tags to each .jsx and .css for easier identification*
 
 # **v1.2.1:**
 
@@ -14,71 +26,49 @@
 # **v1.2.0.1:**
 
 *- Published to a Vercel site ([Folha Alfa News](https://folhaalfanews.vercel.app))*
-
 *- Updated page title & page logo*
-
 *- Fixed minor formatting issues in ZZVER.md*
 
 # **v1.2.0:**
 
 *- Created write.jsx*
-
 *- Created article.jsx*
-
 *- Created article.css*
-
 *- Created write.css*
-
 *- Created auth.js*
-
 *- Created articles.js*
-
 *- Added writing system (italic formatation option does not work yet)*
-
 *- Added Sign Up and Login system*
-
 *- Added article system*
-
 *- Fixed bug where light mode had to be re-enabled every time you changed pages*
 
 # **v1.1.3:**
 
 *- Added "Home" button to every pages's sidebars*
-
 *- Added "disabled" property to all buttons that shouldn't work*
-
 *- Added "Login" and "Sign Up" buttons to every pages's sidebars*
 
 # **v1.1.2:**
 
 *- Deupdated README.md*
-
 *- Created ZZVER.md as a version log*
-
 *- Fixed login & signup pages*
 
 # **v1.1.1:**
 
 *- Dark & light mode switch*
-
 *- Updated README.md to double as commits description*
 
 # **v1.1.0:**
 
 *- Added "css" folder + hub.css*
-
 *- Created header, added logo, side-bar, and unfunctioning login & signup buttons - hub.jsx*
 
 # **v1.0.0:**
 
 *- Created repository*
-
 *- Created zzdefault (Vite & NPM)*
-
 *- Created "pages" folder*
-
 *- Created hub.jsx*
-
 *- Added routing*
-
 *- Made hub.jsx main page*

@@ -1,3 +1,5 @@
+// articles.js
+
 import supabase from "./supabase.js";
 
 // ── Edições ──────────────────────────────────────────────────────────────────

@@ -1,3 +1,5 @@
+// hub.jsx
+
 import { useState, useEffect } from "react";
 import { useNavigate } from 'react-router-dom'
 import { getSession, logout } from "../auth.js";
