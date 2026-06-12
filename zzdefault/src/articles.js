@@ -75,7 +75,7 @@ export async function getArticleById(id) {
   return data;
 }
 
-export async function createArticle({ type, theme, headline, body, coverImage, images, sources, author, editionId }) {
+export async function createArticle({ type, theme, headline, body, coverImage, images, sources, author, coauthors, editionId }) {
   const { data, error } = await supabase.from("articles").insert({
     type,
     theme: theme || null,
@@ -84,6 +84,7 @@ export async function createArticle({ type, theme, headline, body, coverImage, i
     cover_image: coverImage,
     sources,
     author,
+    coauthors: coauthors || null,
     edition_id: editionId || null,
   }).select().single();
   if (error) return null;
@@ -98,6 +99,7 @@ export async function updateArticle(id, fields) {
     body: fields.body,
     cover_image: fields.coverImage,
     sources: fields.sources,
+    coauthors: fields.coauthors || null,
     edition_id: fields.editionId || null,
     updated_at: new Date().toISOString(),
     // author não é atualizado intencionalmente

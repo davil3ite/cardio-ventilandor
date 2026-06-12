@@ -1,3 +1,5 @@
+/* write.css */
+
 @import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,700;1,400;1,700&display=swap');
 
 * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -79,6 +81,155 @@ body { font-family: 'DM Sans', sans-serif; min-height: 100vh; background: #f5f5f
 }
 .edition-create-btn:hover { color: #111; background: #f5f5f5; }
 .edition-create-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+/* ── Co-autoria ── */
+.coauthor-row {
+  display: flex; align-items: center; gap: 12px;
+}
+
+.coauthor-avatars {
+  display: flex; align-items: center; position: relative;
+}
+
+.coauthor-avatar-wrap {
+  position: relative; display: flex;
+}
+
+.coauthor-avatar-img {
+  width: 36px; height: 36px; border-radius: 50%;
+  object-fit: cover; border: 2px solid #fff;
+  display: block;
+}
+
+.coauthor-avatar-placeholder {
+  width: 36px; height: 36px; border-radius: 50%;
+  background: #eee; border: 2px solid #fff;
+  color: #888; font-size: 14px; font-weight: 600;
+  display: flex; align-items: center; justify-content: center;
+  font-family: 'DM Sans', sans-serif;
+}
+
+.coauthor-add-btn {
+  display: flex; align-items: center; gap: 6px;
+  background: none; border: 1.5px dashed #ccc; color: #999;
+  padding: 6px 14px; border-radius: 999px;
+  font-family: 'DM Sans', sans-serif; font-size: 13px;
+  cursor: pointer; transition: border-color 0.2s, color 0.2s;
+}
+.coauthor-add-btn:hover { border-color: #999; color: #555; }
+
+/* Tooltip de co-autores */
+.coauthor-tooltip {
+  position: absolute; top: calc(100% + 8px); left: 0; z-index: 300;
+  background: #fff; border: 1px solid #e0e0e0; border-radius: 10px;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.10);
+  padding: 6px 0; min-width: 160px;
+}
+
+.coauthor-tooltip-item {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 7px 12px; gap: 10px;
+}
+
+.coauthor-tooltip-name {
+  font-family: 'DM Sans', sans-serif; font-size: 13px; color: #333;
+}
+
+.coauthor-tooltip-remove {
+  background: none; border: none; color: #bbb;
+  font-size: 11px; cursor: pointer; padding: 2px 4px;
+  border-radius: 4px; transition: color 0.15s, background 0.15s;
+  flex-shrink: 0; display: flex; align-items: center; justify-content: center;
+}
+.coauthor-tooltip-remove:hover { color: #e05555; background: rgba(224,85,85,0.08); }
+
+/* Modal de busca */
+.coauthor-modal-overlay {
+  position: fixed; inset: 0; z-index: 500;
+  background: rgba(0,0,0,0.35);
+  display: flex; align-items: center; justify-content: center;
+}
+
+.coauthor-modal {
+  background: #fff; border-radius: 14px;
+  box-shadow: 0 8px 40px rgba(0,0,0,0.15);
+  width: 100%; max-width: 360px;
+  padding: 20px; display: flex; flex-direction: column; gap: 14px;
+}
+
+.coauthor-modal-header {
+  display: flex; align-items: center; justify-content: space-between;
+  font-family: 'DM Sans', sans-serif; font-size: 14px; font-weight: 600; color: #111;
+}
+
+.coauthor-modal-close {
+  background: none; border: none; color: #aaa;
+  font-size: 14px; cursor: pointer; padding: 4px;
+  border-radius: 4px; transition: color 0.15s;
+  display: flex; align-items: center; justify-content: center;
+}
+.coauthor-modal-close:hover { color: #555; }
+
+.coauthor-modal-input {
+  background: #f5f5f5; border: 1px solid #e0e0e0; color: #111;
+  padding: 10px 14px; border-radius: 8px;
+  font-family: 'DM Sans', sans-serif; font-size: 14px;
+  outline: none; transition: border-color 0.2s; width: 100%;
+}
+.coauthor-modal-input:focus { border-color: #999; background: #fff; }
+.coauthor-modal-input::placeholder { color: #bbb; }
+
+.coauthor-modal-result {
+  min-height: 44px; display: flex; align-items: center;
+}
+
+.coauthor-result-hint {
+  font-family: 'DM Sans', sans-serif; font-size: 13px; color: #bbb;
+}
+
+.coauthor-result-notfound {
+  font-family: 'DM Sans', sans-serif; font-size: 13px; color: #e05555;
+}
+
+.coauthor-result-found {
+  display: flex; align-items: center; gap: 10px; width: 100%;
+}
+
+.coauthor-result-avatar {
+  width: 36px; height: 36px; border-radius: 50%;
+  object-fit: cover; border: 1px solid #ddd; flex-shrink: 0;
+}
+
+.coauthor-result-avatar-placeholder {
+  width: 36px; height: 36px; border-radius: 50%;
+  background: #eee; border: 1px solid #ddd; color: #888;
+  font-size: 14px; font-weight: 600; flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
+  font-family: 'DM Sans', sans-serif;
+}
+
+.coauthor-result-info {
+  display: flex; flex-direction: column; gap: 1px; flex: 1; min-width: 0;
+}
+
+.coauthor-result-name {
+  font-family: 'DM Sans', sans-serif; font-size: 13px; font-weight: 600; color: #111;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+
+.coauthor-result-username {
+  font-family: 'DM Sans', sans-serif; font-size: 11px; color: #aaa;
+}
+
+.coauthor-result-add-btn {
+  background: #111; border: none; color: #fff;
+  padding: 7px 14px; border-radius: 7px;
+  font-family: 'DM Sans', sans-serif; font-size: 12px; font-weight: 600;
+  cursor: pointer; transition: background 0.2s; flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
+}
+.coauthor-result-add-btn:hover { background: #333; }
+.coauthor-result-add-btn:disabled { opacity: 0.5; cursor: not-allowed; }
 
 /* ── Campos gerais ── */
 .write-field { display: flex; flex-direction: column; gap: 8px; }

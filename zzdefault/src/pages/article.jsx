@@ -9,6 +9,41 @@ import "./css/article.css";
 const INSTAGRAM_URL = "https://www.instagram.com/folha.alfa_news/";
 const CONTACT_EMAIL = "folhaalfanews@gmail.com";
 
+/* ── Helpers de co-autoria ── */
+function formatAuthorsText(author, coauthors) {
+  const all = [author, ...(coauthors || [])];
+  if (all.length === 1) return all[0].name;
+  if (all.length === 2) return `${all[0].name} & ${all[1].name}`;
+  const last = all[all.length - 1];
+  const rest = all.slice(0, -1).map(a => a.name).join(", ");
+  return `${rest} & ${last.name}`;
+}
+
+function AuthorAvatars({ author, coauthors }) {
+  const all = [author, ...(coauthors || [])];
+  return (
+    <div className="article-avatars">
+      {all.map((a, i) => (
+        a.avatar
+          ? <img
+              key={a.username || i}
+              src={a.avatar}
+              className="article-avatar"
+              alt={a.name}
+              style={{ marginLeft: i === 0 ? 0 : -8, zIndex: all.length - i }}
+            />
+          : <div
+              key={a.username || i}
+              className="article-avatar-placeholder"
+              style={{ marginLeft: i === 0 ? 0 : -8, zIndex: all.length - i }}
+            >
+              {a.name[0].toUpperCase()}
+            </div>
+      ))}
+    </div>
+  );
+}
+
 function Article() {
   const navigate = useNavigate();
   const { id } = useParams();
@@ -60,8 +95,8 @@ function Article() {
           </span>
           <h1 className="article-headline">{article.headline}</h1>
           <div className="article-author-row">
-            {article.author.avatar ? <img src={article.author.avatar} className="article-avatar" alt="avatar" /> : <div className="article-avatar-placeholder">{article.author.name[0].toUpperCase()}</div>}
-            <span className="article-author">{article.author.name}</span>
+            <AuthorAvatars author={article.author} coauthors={article.coauthors} />
+            <span className="article-author">{formatAuthorsText(article.author, article.coauthors)}</span>
           </div>
           {article.cover_image && <img src={article.cover_image} alt="capa" className="article-cover" />}
           <div className="article-text" dangerouslySetInnerHTML={{ __html: article.body }} />

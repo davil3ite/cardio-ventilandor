@@ -9,6 +9,41 @@ import "./css/hub.css";
 const INSTAGRAM_URL = "https://www.instagram.com/folha.alfa_news/";
 const CONTACT_EMAIL = "folhaalfanews@gmail.com";
 
+/* ── Helpers de co-autoria ── */
+function formatAuthorsText(author, coauthors) {
+  const all = [author, ...(coauthors || [])];
+  if (all.length === 1) return all[0].name;
+  if (all.length === 2) return `${all[0].name} & ${all[1].name}`;
+  const last = all[all.length - 1];
+  const rest = all.slice(0, -1).map(a => a.name).join(", ");
+  return `${rest} & ${last.name}`;
+}
+
+function AuthorAvatars({ author, coauthors }) {
+  const all = [author, ...(coauthors || [])];
+  return (
+    <div className="card-avatars">
+      {all.map((a, i) => (
+        a.avatar
+          ? <img
+              key={a.username || i}
+              src={a.avatar}
+              className="card-avatar"
+              alt={a.name}
+              style={{ marginLeft: i === 0 ? 0 : -6, zIndex: all.length - i }}
+            />
+          : <div
+              key={a.username || i}
+              className="card-avatar-placeholder"
+              style={{ marginLeft: i === 0 ? 0 : -6, zIndex: all.length - i }}
+            >
+              {a.name[0].toUpperCase()}
+            </div>
+      ))}
+    </div>
+  );
+}
+
 function Layout() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const navigate = useNavigate();
@@ -39,29 +74,21 @@ function Layout() {
   }
 
   function groupByEdition(articles, editions) {
-    // Mapa id -> edition
     const edMap = {};
     editions.forEach(e => { edMap[e.id] = e; });
-
-    // Agrupa
-    const groups = {}; // edition_id (ou "__none__") -> { edition, articles[] }
+    const groups = {};
     articles.forEach(a => {
       const key = a.edition_id || "__none__";
       if (!groups[key]) {
-        groups[key] = {
-          edition: a.edition_id ? edMap[a.edition_id] : null,
-          articles: [],
-        };
+        groups[key] = { edition: a.edition_id ? edMap[a.edition_id] : null, articles: [] };
       }
       groups[key].articles.push(a);
     });
-
     const sorted = Object.values(groups).sort((a, b) => {
       if (!a.edition) return 1;
       if (!b.edition) return -1;
       return b.edition.number - a.edition.number;
     });
-
     return sorted;
   }
 
@@ -142,13 +169,9 @@ function Layout() {
           <div className="articles-grid">
             {grouped.map((group, gi) => (
               <div key={gi} className="edition-group">
-
-                {/* Separador de edição — só aparece se houver mais de uma edição com artigos */}
                 {hasMultipleEditions && group.edition && (
                   <div className="edition-separator">
-                    <span className="edition-separator-label">
-                      Edição {group.edition.number}
-                    </span>
+                    <span className="edition-separator-label">Edição {group.edition.number}</span>
                     <span className="edition-separator-line" />
                   </div>
                 )}
@@ -163,10 +186,8 @@ function Layout() {
                       <h2 className="card-headline">{a.headline}</h2>
                       <p className="card-excerpt">{a.body.replace(/<[^>]+>/g, '').slice(0, 120)}...</p>
                       <div className="card-meta">
-                        {a.author.avatar
-                          ? <img src={a.author.avatar} className="card-avatar" alt="avatar" />
-                          : <div className="card-avatar-placeholder">{a.author.name[0].toUpperCase()}</div>}
-                        <span>{a.author.name}</span>
+                        <AuthorAvatars author={a.author} coauthors={a.coauthors} />
+                        <span>{formatAuthorsText(a.author, a.coauthors)}</span>
                         <span>{timeAgo(a.created_at)}</span>
                       </div>
                       {canEdit(a) && (

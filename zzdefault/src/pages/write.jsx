@@ -4,11 +4,13 @@ import { useState, useRef, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { getSession } from "../auth.js";
 import { createArticle, updateArticle, getArticleById, getEditions, createEdition, deleteEdition } from "../articles.js";
+import supabase from "../supabase.js";
 import "./css/write.css";
 
 const TYPES = ["Notícia", "Reportagem", "Artigo de opinião", "Crônica"];
 const THEMES = ["Esportes", "Cultura", "Escola", "Mundo", "Ciência", "Tecnologia", "Saúde", "Arte"];
 const THEMES_VISIBLE = 6;
+const MAX_COAUTHORS = 4;
 
 function fileToBase64(file) {
   return new Promise((res, rej) => {
@@ -21,15 +23,12 @@ function fileToBase64(file) {
 
 function applyFormat(tag) {
   const sel = window.getSelection();
-
   if (!sel || sel.rangeCount === 0 || sel.isCollapsed) {
     const commands = { b: "bold", i: "italic", u: "underline" };
     if (commands[tag]) document.execCommand(commands[tag], false, null);
     return;
   }
-
   const range = sel.getRangeAt(0);
-
   let node = sel.anchorNode;
   while (node) {
     if (node.nodeName === tag.toUpperCase()) {
@@ -40,7 +39,6 @@ function applyFormat(tag) {
     }
     node = node.parentNode;
   }
-
   const wrapper = document.createElement(tag);
   try {
     range.surroundContents(wrapper);
@@ -54,7 +52,6 @@ function applyFormat(tag) {
   sel.addRange(newRange);
 }
 
-/* ── Ícones SVG da toolbar ── */
 function IconAlignLeft() {
   return (
     <svg width="16" height="16" viewBox="0 0 16 16" fill="#666">
@@ -96,6 +93,161 @@ function IconAlignJustify() {
   );
 }
 
+/* ── Co-author avatar stack ── */
+function CoauthorStack({ author, coauthors, onAddClick, onRemove, maxReached }) {
+  const [tooltipOpen, setTooltipOpen] = useState(false);
+  const tooltipRef = useRef(null);
+
+  useEffect(() => {
+    function handleClick(e) {
+      if (tooltipRef.current && !tooltipRef.current.contains(e.target)) {
+        setTooltipOpen(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClick);
+    return () => document.removeEventListener("mousedown", handleClick);
+  }, []);
+
+  const allAuthors = [{ ...author, isMain: true }, ...coauthors];
+
+  return (
+    <div className="coauthor-row">
+      <div
+        className="coauthor-avatars"
+        ref={tooltipRef}
+        onMouseEnter={() => coauthors.length > 0 && setTooltipOpen(true)}
+        onMouseLeave={() => setTooltipOpen(false)}
+      >
+        {allAuthors.map((a, i) => (
+          <div
+            key={a.username}
+            className="coauthor-avatar-wrap"
+            style={{ zIndex: allAuthors.length - i, marginLeft: i === 0 ? 0 : -8 }}
+          >
+            {a.avatar
+              ? <img src={a.avatar} className="coauthor-avatar-img" alt={a.name} />
+              : <div className="coauthor-avatar-placeholder">{a.name[0].toUpperCase()}</div>
+            }
+          </div>
+        ))}
+
+        {coauthors.length > 0 && tooltipOpen && (
+          <div className="coauthor-tooltip">
+            {coauthors.map(ca => (
+              <div key={ca.username} className="coauthor-tooltip-item">
+                <span className="coauthor-tooltip-name">{ca.username}</span>
+                <button
+                  className="coauthor-tooltip-remove"
+                  onClick={(e) => { e.stopPropagation(); onRemove(ca.username); }}
+                  title="Remover co-autor"
+                >✕</button>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+
+      {!maxReached && (
+        <button className="coauthor-add-btn" onClick={onAddClick} title="Adicionar co-autor">
+          <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+            <circle cx="7" cy="7" r="6" stroke="#999" strokeWidth="1.2" strokeDasharray="3 2"/>
+            <path d="M7 4v6M4 7h6" stroke="#999" strokeWidth="1.4" strokeLinecap="round"/>
+          </svg>
+          <span>Adicionar co-autor</span>
+        </button>
+      )}
+    </div>
+  );
+}
+
+/* ── Modal de busca de co-autor ── */
+function CoauthorSearchModal({ onClose, onAdd, existingUsernames, currentUsername }) {
+  const [query, setQuery] = useState("");
+  const [result, setResult] = useState(null); // null | "loading" | "not_found" | { user }
+  const [adding, setAdding] = useState(false);
+  const debounceRef = useRef(null);
+  const inputRef = useRef(null);
+
+  useEffect(() => {
+    inputRef.current?.focus();
+  }, []);
+
+  useEffect(() => {
+    const q = query.trim().toLowerCase();
+    if (!q) { setResult(null); return; }
+
+    clearTimeout(debounceRef.current);
+    setResult("loading");
+    debounceRef.current = setTimeout(async () => {
+      const { data } = await supabase
+        .from("users")
+        .select("name, username, avatar")
+        .eq("username", q)
+        .single();
+
+      if (!data) {
+        setResult("not_found");
+      } else if (data.username === currentUsername) {
+        setResult("self");
+      } else if (existingUsernames.includes(data.username)) {
+        setResult("already_added");
+      } else {
+        setResult({ user: data });
+      }
+    }, 400);
+
+    return () => clearTimeout(debounceRef.current);
+  }, [query]);
+
+  async function handleAdd() {
+    if (!result || typeof result !== "object") return;
+    setAdding(true);
+    onAdd(result.user);
+    onClose();
+  }
+
+  return (
+    <div className="coauthor-modal-overlay" onClick={onClose}>
+      <div className="coauthor-modal" onClick={e => e.stopPropagation()}>
+        <div className="coauthor-modal-header">
+          <span>Adicionar co-autor</span>
+          <button className="coauthor-modal-close" onClick={onClose}>✕</button>
+        </div>
+        <input
+          ref={inputRef}
+          className="coauthor-modal-input"
+          placeholder="username"
+          value={query}
+          onChange={e => setQuery(e.target.value)}
+          autoComplete="off"
+        />
+        <div className="coauthor-modal-result">
+          {result === null && <span className="coauthor-result-hint">Digite o username do co-autor</span>}
+          {result === "loading" && <span className="coauthor-result-hint">Buscando...</span>}
+          {result === "not_found" && <span className="coauthor-result-notfound">Usuário não encontrado</span>}
+          {result === "self" && <span className="coauthor-result-notfound">Você já é o autor</span>}
+          {result === "already_added" && <span className="coauthor-result-notfound">Co-autor já adicionado</span>}
+          {result && typeof result === "object" && (
+            <div className="coauthor-result-found">
+              {result.user.avatar
+                ? <img src={result.user.avatar} className="coauthor-result-avatar" alt={result.user.name} />
+                : <div className="coauthor-result-avatar-placeholder">{result.user.name[0].toUpperCase()}</div>
+              }
+              <div className="coauthor-result-info">
+                <span className="coauthor-result-name">{result.user.name}</span>
+                <span className="coauthor-result-username">{result.user.username}</span>
+              </div>
+              <button className="coauthor-result-add-btn" onClick={handleAdd} disabled={adding}>
+                {adding ? "..." : "Adicionar"}
+              </button>
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
 function Write() {
   const navigate = useNavigate();
   const { id } = useParams();
@@ -121,6 +273,10 @@ function Write() {
   const [editionLoading, setEditionLoading] = useState(false);
   const [deleteWarning, setDeleteWarning] = useState(null);
 
+  // Co-autoria
+  const [coauthors, setCoauthors] = useState([]);
+  const [coauthorModalOpen, setCoauthorModalOpen] = useState(false);
+
   const bodyRef = useRef(null);
   const coverInputRef = useRef(null);
   const inlineInputRef = useRef(null);
@@ -143,6 +299,7 @@ function Write() {
           setCoverImage(a.cover_image || "");
           setCoverPreview(a.cover_image || "");
           setSources(a.sources?.length ? a.sources : [{ label: "", url: "" }]);
+          setCoauthors(a.coauthors || []);
           if (bodyRef.current) bodyRef.current.innerHTML = a.body;
           if (a.edition_id) {
             getEditions().then(eds => {
@@ -200,7 +357,6 @@ function Write() {
   function updateActiveFormats() {
     const sel = window.getSelection();
     if (!sel || sel.rangeCount === 0) return;
-
     if (sel.isCollapsed) {
       setActiveFormats({
         b: document.queryCommandState("bold"),
@@ -209,7 +365,6 @@ function Write() {
       });
       return;
     }
-
     let node = sel.anchorNode;
     const active = { b: false, i: false, u: false };
     while (node && node !== bodyRef.current) {
@@ -264,6 +419,14 @@ function Write() {
   function removeSource(i) { setSources(s => s.filter((_, idx) => idx !== i)); }
   function updateSource(i, field, value) { setSources(s => s.map((src, idx) => idx === i ? { ...src, [field]: value } : src)); }
 
+  function handleAddCoauthor(user) {
+    setCoauthors(prev => [...prev, { name: user.name, username: user.username, avatar: user.avatar || "" }]);
+  }
+
+  function handleRemoveCoauthor(username) {
+    setCoauthors(prev => prev.filter(ca => ca.username !== username));
+  }
+
   async function handlePublish() {
     if (!headline.trim()) { setError("A manchete é obrigatória."); return; }
     if (!body.trim() || body === "<br>") { setError("O texto é obrigatório."); return; }
@@ -277,6 +440,7 @@ function Write() {
       images: [],
       sources: sources.filter(s => s.url.trim()),
       author: { name: session.name, username: session.username, avatar: session.avatar || "" },
+      coauthors: coauthors.length > 0 ? coauthors : null,
       editionId: selectedEdition?.id || null,
     };
     if (id) await updateArticle(id, data);
@@ -288,6 +452,7 @@ function Write() {
   const visibleThemes = THEMES.slice(0, THEMES_VISIBLE);
   const overflowThemes = THEMES.slice(THEMES_VISIBLE);
   const isOverflowTheme = theme && overflowThemes.includes(theme);
+  const maxReached = coauthors.length >= MAX_COAUTHORS;
 
   return (
     <div>
@@ -363,6 +528,15 @@ function Write() {
               </div>
             ) : null}
           </div>
+
+          {/* Co-autoria */}
+          <CoauthorStack
+            author={{ name: session?.name || "", username: session?.username || "", avatar: session?.avatar || "" }}
+            coauthors={coauthors}
+            onAddClick={() => setCoauthorModalOpen(true)}
+            onRemove={handleRemoveCoauthor}
+            maxReached={maxReached}
+          />
 
           {/* Tipo */}
           <div className="write-field">
@@ -475,6 +649,15 @@ function Write() {
           </button>
         </div>
       </main>
+
+      {coauthorModalOpen && (
+        <CoauthorSearchModal
+          onClose={() => setCoauthorModalOpen(false)}
+          onAdd={handleAddCoauthor}
+          existingUsernames={coauthors.map(ca => ca.username)}
+          currentUsername={session?.username}
+        />
+      )}
     </div>
   );
 }
