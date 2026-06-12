@@ -54,19 +54,19 @@ button { display: flex; align-items: center; justify-content: center; text-align
   position: fixed; inset: 0; z-index: 90;
   background: rgba(0,0,0,0.3); opacity: 0; pointer-events: none; transition: opacity 0.3s;
 }
-.sidebar-overlay.visible { opacity: 1; pointer-events: all; }
+.sidebar-overlay.visible { opacity: 0.5; pointer-events: all; }
 
 .sidebar {
   position: fixed; top: 64px; left: 0; bottom: 0; width: 260px;
-  background: #fff; border-right: 1px solid #e0e0e0;
+  background: #FF1E2D; border-right: 1px solid rgb(215, 41, 41);
   transform: translateX(-100%); transition: transform 0.3s cubic-bezier(0.4,0,0.2,1);
   z-index: 200 !important;
 }
 .sidebar.open { transform: translateX(0); }
 
 .sidebar-header { position: absolute; top: 12px; left: 0; right: 0; display: flex; align-items: center; justify-content: center; }
-.sidebar-home { background: none; font-family: 'DM Sans', sans-serif; font-size: x-large; font-weight: bolder; width: 250px; height: 50px; color: #111; }
-.sidebar-home:hover { background: none; }
+.sidebar-home { background: none; font-family: 'DM Sans', sans-serif; font-size: x-large; font-weight: bolder; width: 250px; height: 50px; color: #FDF4F6; }
+.sidebar-home:hover { background: none; border: none; }
 
 .sidebar-footer {
   position: absolute; bottom: 24px; left: 0; right: 0;
@@ -75,17 +75,20 @@ button { display: flex; align-items: center; justify-content: center; text-align
 .sidebar-logsign { display: flex; align-items: center; justify-content: center; flex-direction: row; gap: 10px; }
 
 .sb-login {
-  background: none; border: 1px solid #ccc; color: #444;
+  background: none; border: 1px solid rgb(215, 41, 41); color: #FDF4F6;
   padding: 8px 18px; border-radius: 8px;
   font-family: 'DM Sans', sans-serif; font-size: 10px; font-weight: 500; cursor: pointer;
   transition: border-color 0.2s, color 0.2s; letter-spacing: 0.02em;
 }
+.sb-login:hover { background-color: rgb(215, 41, 41);}
+
 .sb-signup {
-  background: none; border: 1px solid #ccc; color: #444;
+  background: none; border: 1px solid rgb(215, 41, 41); color: #FDF4F6;
   padding: 8px 18px; border-radius: 8px;
   font-family: 'DM Sans', sans-serif; font-size: 10px; font-weight: 500; cursor: pointer;
   transition: border-color 0.2s, color 0.2s; letter-spacing: 0.02em;
 }
+.sb-signup:hover { background-color: rgb(215, 41, 41);}
 
 .page-content {
   padding-top: 64px; padding-bottom: 48px; min-height: 100vh;

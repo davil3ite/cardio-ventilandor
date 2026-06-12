@@ -14,11 +14,11 @@ body { font-family: 'DM Sans', sans-serif; min-height: 100vh; background: #f5f5f
 .header-center { position: absolute; left: 50%; transform: translateX(-50%); }
 .btn-logo { background: none; border: none; cursor: pointer; }
 .btn-back {
-  background: none; border: 1px solid #ddd; color: #555;
+  background: none; border: 1px solid #FDF4F6; color: #FDF4F6;
   padding: 8px 14px; border-radius: 8px; font-family: 'DM Sans', sans-serif;
   font-size: 12px; cursor: pointer; transition: border-color 0.2s, color 0.2s;
 }
-.btn-back:hover { border-color: #999; color: #111; }
+.btn-back:hover { border-color: #FDF4F6; color: #FDF4F6; background-color: rgb(215, 41, 41);}
 
 .write-content {
   position: fixed; top: 64px; left: 0; right: 0; bottom: 0;

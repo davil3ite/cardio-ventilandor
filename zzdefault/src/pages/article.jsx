@@ -39,7 +39,7 @@ function Article() {
     <div>
       <header className="header">
         <div className="header-left">
-          <button className="btn-back" onClick={() => navigate("/")}>← Voltar</button>
+          <button className="btn-back" onClick={() => navigate("/")}>◀</button>
         </div>
         <div className="header-center">
           <button className="btn-logo" onClick={() => navigate("/")}>
