@@ -11,6 +11,16 @@ export async function getEditions() {
   return data;
 }
 
+export async function getEditionById(id) {
+  const { data, error } = await supabase
+    .from("editions")
+    .select("*")
+    .eq("id", id)
+    .single();
+  if (error) return null;
+  return data;
+}
+
 export async function createEdition() {
   const { data: existing } = await supabase
     .from("editions")

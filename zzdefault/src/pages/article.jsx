@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { getSession } from "../auth.js";
-import { getArticleById, deleteArticle } from "../articles.js";
+import { getArticleById, getEditionById, deleteArticle } from "../articles.js";
 import "./css/article.css";
 
 const INSTAGRAM_URL = "https://www.instagram.com/folha.alfa_news/";
@@ -13,9 +13,18 @@ function Article() {
   const session = getSession();
   const [sourcesOpen, setSourcesOpen] = useState(false);
   const [article, setArticle] = useState(null);
+  const [edition, setEdition] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => { getArticleById(id).then(data => { setArticle(data); setLoading(false); }); }, [id]);
+  useEffect(() => {
+    getArticleById(id).then(data => {
+      setArticle(data);
+      setLoading(false);
+      if (data?.edition_id) {
+        getEditionById(data.edition_id).then(ed => setEdition(ed));
+      }
+    });
+  }, [id]);
 
   if (loading) return <div style={{ display:"flex", alignItems:"center", justifyContent:"center", height:"100vh", background:"#f5f5f5" }}><p style={{ color: "#aaa", fontFamily: "Syne, sans-serif" }}>Carregando...</p></div>;
   if (!article) return <div style={{ display:"flex", alignItems:"center", justifyContent:"center", height:"100vh", background:"#f5f5f5" }}><p style={{ color: "#aaa", fontFamily: "Syne, sans-serif" }}>Matéria não encontrada.</p></div>;
@@ -42,7 +51,11 @@ function Article() {
 
       <main className="article-content">
         <div className="article-body">
-          <span className="article-type">{article.type}</span>
+          <span className="article-type">
+            {article.type}
+            {article.theme && <> • {article.theme}</>}
+            {edition && <> • Edição {edition.number}</>}
+          </span>
           <h1 className="article-headline">{article.headline}</h1>
           <div className="article-author-row">
             {article.author.avatar ? <img src={article.author.avatar} className="article-avatar" alt="avatar" /> : <div className="article-avatar-placeholder">{article.author.name[0].toUpperCase()}</div>}
