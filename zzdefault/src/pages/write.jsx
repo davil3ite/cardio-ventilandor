@@ -54,6 +54,48 @@ function applyFormat(tag) {
   sel.addRange(newRange);
 }
 
+/* ── Ícones SVG da toolbar ── */
+function IconAlignLeft() {
+  return (
+    <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+      <rect x="1" y="2" width="14" height="1.5" rx="0.75"/>
+      <rect x="1" y="5.5" width="10" height="1.5" rx="0.75"/>
+      <rect x="1" y="9" width="14" height="1.5" rx="0.75"/>
+      <rect x="1" y="12.5" width="10" height="1.5" rx="0.75"/>
+    </svg>
+  );
+}
+function IconAlignCenter() {
+  return (
+    <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+      <rect x="1" y="2" width="14" height="1.5" rx="0.75"/>
+      <rect x="3" y="5.5" width="10" height="1.5" rx="0.75"/>
+      <rect x="1" y="9" width="14" height="1.5" rx="0.75"/>
+      <rect x="3" y="12.5" width="10" height="1.5" rx="0.75"/>
+    </svg>
+  );
+}
+function IconAlignRight() {
+  return (
+    <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+      <rect x="1" y="2" width="14" height="1.5" rx="0.75"/>
+      <rect x="5" y="5.5" width="10" height="1.5" rx="0.75"/>
+      <rect x="1" y="9" width="14" height="1.5" rx="0.75"/>
+      <rect x="5" y="12.5" width="10" height="1.5" rx="0.75"/>
+    </svg>
+  );
+}
+function IconAlignJustify() {
+  return (
+    <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+      <rect x="1" y="2" width="14" height="1.5" rx="0.75"/>
+      <rect x="1" y="5.5" width="14" height="1.5" rx="0.75"/>
+      <rect x="1" y="9" width="14" height="1.5" rx="0.75"/>
+      <rect x="1" y="12.5" width="10" height="1.5" rx="0.75"/>
+    </svg>
+  );
+}
+
 function Write() {
   const navigate = useNavigate();
   const { id } = useParams();
@@ -158,11 +200,6 @@ function Write() {
     const sel = window.getSelection();
     if (!sel || sel.rangeCount === 0) return;
 
-    // Quando o cursor está parado (sem texto selecionado), o estado "real" de
-    // formatação para o próximo caractere digitado é dado por queryCommandState,
-    // que já reflete eventuais toggles feitos via execCommand antes de o DOM mudar.
-    // Usar a checagem de ancestrais aqui causava o botão "preso" no estado anterior
-    // até o usuário digitar algo.
     if (sel.isCollapsed) {
       setActiveFormats({
         b: document.queryCommandState("bold"),
@@ -172,9 +209,6 @@ function Write() {
       return;
     }
 
-    // Quando há um trecho selecionado, a checagem de ancestrais reflete melhor
-    // a formatação efetivamente aplicada (inclusive a aplicada manualmente via
-    // surroundContents/unwrap em applyFormat).
     let node = sel.anchorNode;
     const active = { b: false, i: false, u: false };
     while (node && node !== bodyRef.current) {
@@ -395,22 +429,14 @@ function Write() {
           <div className="write-field">
             <label>Texto</label>
             <div className="editor-toolbar">
-              <button
-                className={activeFormats.b ? "active" : ""}
-                onMouseDown={e => handleFormat(e, "b")}
-              ><b>B</b></button>
-              <button
-                className={activeFormats.i ? "active" : ""}
-                onMouseDown={e => handleFormat(e, "i")}
-              ><i>I</i></button>
-              <button
-                className={activeFormats.u ? "active" : ""}
-                onMouseDown={e => handleFormat(e, "u")}
-              ><u>U</u></button>
+              <button className={activeFormats.b ? "active" : ""} onMouseDown={e => handleFormat(e, "b")}><b>B</b></button>
+              <button className={activeFormats.i ? "active" : ""} onMouseDown={e => handleFormat(e, "i")}><i>I</i></button>
+              <button className={activeFormats.u ? "active" : ""} onMouseDown={e => handleFormat(e, "u")}><u>U</u></button>
               <span className="toolbar-sep" />
-              <button onMouseDown={e => handleAlign(e, "Left")}>⬅</button>
-              <button onMouseDown={e => handleAlign(e, "Center")}>☰</button>
-              <button onMouseDown={e => handleAlign(e, "Right")}>➡</button>
+              <button onMouseDown={e => handleAlign(e, "Left")} title="Alinhar à esquerda"><IconAlignLeft /></button>
+              <button onMouseDown={e => handleAlign(e, "Center")} title="Centralizar"><IconAlignCenter /></button>
+              <button onMouseDown={e => handleAlign(e, "Right")} title="Alinhar à direita"><IconAlignRight /></button>
+              <button onMouseDown={e => handleAlign(e, "Full")} title="Justificar"><IconAlignJustify /></button>
               <span className="toolbar-sep" />
               <button onMouseDown={e => { e.preventDefault(); inlineInputRef.current.click(); }}>🖼</button>
               <input ref={inlineInputRef} type="file" accept="image/*" style={{ display: "none" }} onChange={handleInlineImage} />
