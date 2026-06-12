@@ -57,7 +57,7 @@ function applyFormat(tag) {
 /* ── Ícones SVG da toolbar ── */
 function IconAlignLeft() {
   return (
-    <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+    <svg width="16" height="16" viewBox="0 0 16 16" fill="#666">
       <rect x="1" y="2" width="14" height="1.5" rx="0.75"/>
       <rect x="1" y="5.5" width="10" height="1.5" rx="0.75"/>
       <rect x="1" y="9" width="14" height="1.5" rx="0.75"/>
@@ -67,7 +67,7 @@ function IconAlignLeft() {
 }
 function IconAlignCenter() {
   return (
-    <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+    <svg width="16" height="16" viewBox="0 0 16 16" fill="#111">
       <rect x="1" y="2" width="14" height="1.5" rx="0.75"/>
       <rect x="3" y="5.5" width="10" height="1.5" rx="0.75"/>
       <rect x="1" y="9" width="14" height="1.5" rx="0.75"/>
@@ -77,7 +77,7 @@ function IconAlignCenter() {
 }
 function IconAlignRight() {
   return (
-    <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+    <svg width="16" height="16" viewBox="0 0 16 16" fill="#111">
       <rect x="1" y="2" width="14" height="1.5" rx="0.75"/>
       <rect x="5" y="5.5" width="10" height="1.5" rx="0.75"/>
       <rect x="1" y="9" width="14" height="1.5" rx="0.75"/>
@@ -87,7 +87,7 @@ function IconAlignRight() {
 }
 function IconAlignJustify() {
   return (
-    <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+    <svg width="16" height="16" viewBox="0 0 16 16" fill="#111">
       <rect x="1" y="2" width="14" height="1.5" rx="0.75"/>
       <rect x="1" y="5.5" width="14" height="1.5" rx="0.75"/>
       <rect x="1" y="9" width="14" height="1.5" rx="0.75"/>
