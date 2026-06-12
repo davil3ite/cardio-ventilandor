@@ -67,7 +67,7 @@ function IconAlignLeft() {
 }
 function IconAlignCenter() {
   return (
-    <svg width="16" height="16" viewBox="0 0 16 16" fill="#111">
+    <svg width="16" height="16" viewBox="0 0 16 16" fill="#666">
       <rect x="1" y="2" width="14" height="1.5" rx="0.75"/>
       <rect x="3" y="5.5" width="10" height="1.5" rx="0.75"/>
       <rect x="1" y="9" width="14" height="1.5" rx="0.75"/>
@@ -77,7 +77,7 @@ function IconAlignCenter() {
 }
 function IconAlignRight() {
   return (
-    <svg width="16" height="16" viewBox="0 0 16 16" fill="#111">
+    <svg width="16" height="16" viewBox="0 0 16 16" fill="#666">
       <rect x="1" y="2" width="14" height="1.5" rx="0.75"/>
       <rect x="5" y="5.5" width="10" height="1.5" rx="0.75"/>
       <rect x="1" y="9" width="14" height="1.5" rx="0.75"/>
@@ -87,7 +87,7 @@ function IconAlignRight() {
 }
 function IconAlignJustify() {
   return (
-    <svg width="16" height="16" viewBox="0 0 16 16" fill="#111">
+    <svg width="16" height="16" viewBox="0 0 16 16" fill="#666">
       <rect x="1" y="2" width="14" height="1.5" rx="0.75"/>
       <rect x="1" y="5.5" width="14" height="1.5" rx="0.75"/>
       <rect x="1" y="9" width="14" height="1.5" rx="0.75"/>
@@ -112,6 +112,7 @@ function Write() {
   const [error, setError] = useState("");
   const [publishing, setPublishing] = useState(false);
   const [activeFormats, setActiveFormats] = useState({ b: false, i: false, u: false });
+  const [activeAlign, setActiveAlign] = useState("Left");
 
   // Edições
   const [editions, setEditions] = useState([]);
@@ -234,6 +235,7 @@ function Write() {
     bodyRef.current.focus();
     document.execCommand("justify" + dir, false, null);
     setBody(bodyRef.current.innerHTML);
+    setActiveAlign(dir);
   }
 
   function handlePaste(e) {
@@ -433,10 +435,10 @@ function Write() {
               <button className={activeFormats.i ? "active" : ""} onMouseDown={e => handleFormat(e, "i")}><i>I</i></button>
               <button className={activeFormats.u ? "active" : ""} onMouseDown={e => handleFormat(e, "u")}><u>U</u></button>
               <span className="toolbar-sep" />
-              <button onMouseDown={e => handleAlign(e, "Left")} title="Alinhar à esquerda"><IconAlignLeft /></button>
-              <button onMouseDown={e => handleAlign(e, "Center")} title="Centralizar"><IconAlignCenter /></button>
-              <button onMouseDown={e => handleAlign(e, "Right")} title="Alinhar à direita"><IconAlignRight /></button>
-              <button onMouseDown={e => handleAlign(e, "Full")} title="Justificar"><IconAlignJustify /></button>
+              <button onMouseDown={e => handleAlign(e, "Left")} className={activeAlign === "Left" ? "active" : ""} title="Alinhar à esquerda"><IconAlignLeft /></button>
+              <button onMouseDown={e => handleAlign(e, "Center")} className={activeAlign === "Center" ? "active" : ""} title="Centralizar"><IconAlignCenter /></button>
+              <button onMouseDown={e => handleAlign(e, "Right")} className={activeAlign === "Right" ? "active" : ""} title="Alinhar à direita"><IconAlignRight /></button>
+              <button onMouseDown={e => handleAlign(e, "Full")} className={activeAlign === "Full" ? "active" : ""} title="Justificar"><IconAlignJustify /></button>
               <span className="toolbar-sep" />
               <button onMouseDown={e => { e.preventDefault(); inlineInputRef.current.click(); }}>🖼</button>
               <input ref={inlineInputRef} type="file" accept="image/*" style={{ display: "none" }} onChange={handleInlineImage} />

@@ -1,6 +1,4 @@
-/* write.css */
-
-@import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,700;1,300;1,400;1,500;1,700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,700;1,400;1,700&display=swap');
 
 * { margin: 0; padding: 0; box-sizing: border-box; }
 body { font-family: 'DM Sans', sans-serif; min-height: 100vh; background: #f5f5f5; color: #111; }
@@ -16,11 +14,11 @@ body { font-family: 'DM Sans', sans-serif; min-height: 100vh; background: #f5f5f
 .header-center { position: absolute; left: 50%; transform: translateX(-50%); }
 .btn-logo { background: none; border: none; cursor: pointer; }
 .btn-back {
-  background: none !important; border: 1px solid #FDF4F6 !important; color: #FDF4F6 !important;
+  background: none; border: 1px solid #ddd; color: #555;
   padding: 8px 14px; border-radius: 8px; font-family: 'DM Sans', sans-serif;
   font-size: 12px; cursor: pointer; transition: border-color 0.2s, color 0.2s;
 }
-.btn-back:hover { border-color: #FDF4F6; color: #FDF4F6; background-color: rgb(215, 41, 41);}
+.btn-back:hover { border-color: #999; color: #111; }
 
 .write-content {
   position: fixed; top: 64px; left: 0; right: 0; bottom: 0;
@@ -33,34 +31,25 @@ body { font-family: 'DM Sans', sans-serif; min-height: 100vh; background: #f5f5f
   padding-bottom: 60px;
 }
 
-/* Título + pill de edição lado a lado */
-.write-title-row {
-  display: flex; align-items: center; gap: 14px; flex-wrap: wrap;
-}
-
+.write-title-row { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; }
 .write-title { font-family: 'Syne', sans-serif; font-size: 28px; font-weight: 800; color: #111; letter-spacing: 0.04em; }
 
 /* ── Dropdown de edições ── */
 .edition-dropdown-wrap { position: relative; }
-
 .edition-pill {
   display: flex; align-items: center; gap: 4px;
   background: none; border: 1px solid #ddd; color: #666;
   padding: 6px 12px; border-radius: 999px;
   font-family: 'DM Sans', sans-serif; font-size: 12px; font-weight: 500;
-  cursor: pointer; transition: border-color 0.2s, color 0.2s;
-  white-space: nowrap;
+  cursor: pointer; transition: border-color 0.2s, color 0.2s; white-space: nowrap;
 }
 .edition-pill:hover { border-color: #999; color: #111; }
-
 .edition-dropdown {
   position: absolute; top: calc(100% + 6px); left: 0; z-index: 200;
   background: #fff; border: 1px solid #ddd; border-radius: 10px;
   box-shadow: 0 4px 16px rgba(0,0,0,0.08);
-  min-width: 180px; overflow: hidden;
-  display: flex; flex-direction: column;
+  min-width: 180px; overflow: hidden; display: flex; flex-direction: column;
 }
-
 .edition-option {
   display: flex; align-items: center; justify-content: space-between;
   padding: 10px 14px; font-family: 'DM Sans', sans-serif; font-size: 13px;
@@ -68,25 +57,20 @@ body { font-family: 'DM Sans', sans-serif; min-height: 100vh; background: #f5f5f
 }
 .edition-option:hover { background: #f5f5f5; }
 .edition-option.active { background: #f0f0f0; font-weight: 600; color: #111; }
-
 .edition-delete-btn {
   background: none; border: 1px solid #ddd; color: #bbb;
   width: 20px; height: 20px; border-radius: 4px; cursor: pointer;
   font-size: 13px; flex-shrink: 0; font-weight: 700;
   display: flex; align-items: center; justify-content: center;
-  transition: border-color 0.2s, color 0.2s, background 0.2s;
-  line-height: 1;
+  transition: border-color 0.2s, color 0.2s, background 0.2s; line-height: 1;
 }
 .edition-delete-btn:hover { border-color: #e05555; color: #e05555; }
 .edition-delete-btn.warn { border-color: #e05555; color: #fff; background: #e05555; }
-
 .edition-delete-warn {
   font-family: 'DM Sans', sans-serif; font-size: 11px; color: #e05555;
   padding: 8px 14px; background: rgba(224,85,85,0.06);
-  border-top: 1px solid rgba(224,85,85,0.15);
-  line-height: 1.4;
+  border-top: 1px solid rgba(224,85,85,0.15); line-height: 1.4;
 }
-
 .edition-create-btn {
   background: none; border: none; border-top: 1px solid #eee;
   color: #888; padding: 10px 14px; font-family: 'DM Sans', sans-serif;
@@ -100,7 +84,6 @@ body { font-family: 'DM Sans', sans-serif; min-height: 100vh; background: #f5f5f
 .write-field { display: flex; flex-direction: column; gap: 8px; }
 .write-field label { font-size: 11px; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: #888; }
 .optional { font-weight: 400; text-transform: none; letter-spacing: 0; color: #aaa; }
-
 .write-field input {
   background: #fff; border: 1px solid #ddd; color: #111;
   padding: 10px 14px; border-radius: 8px;
@@ -110,7 +93,7 @@ body { font-family: 'DM Sans', sans-serif; min-height: 100vh; background: #f5f5f
 .write-field input:focus { border-color: #999; }
 .write-field input::placeholder { color: #bbb; }
 
-/* ── Tipo e Tema (botões pill compartilhados) ── */
+/* ── Tipo e Tema ── */
 .type-options { display: flex; flex-wrap: wrap; gap: 8px; }
 .type-btn {
   background: none; border: 1px solid #ddd; color: #888;
@@ -122,17 +105,13 @@ body { font-family: 'DM Sans', sans-serif; min-height: 100vh; background: #f5f5f
 
 /* ── Overflow de temas ── */
 .theme-overflow-wrap { position: relative; }
-
 .theme-overflow-trigger { min-width: 48px; }
-
 .theme-overflow-dropdown {
   position: absolute; top: calc(100% + 6px); left: 0; z-index: 200;
   background: #fff; border: 1px solid #ddd; border-radius: 10px;
   box-shadow: 0 4px 16px rgba(0,0,0,0.08);
-  min-width: 140px; overflow: hidden;
-  display: flex; flex-direction: column;
+  min-width: 140px; overflow: hidden; display: flex; flex-direction: column;
 }
-
 .theme-overflow-item {
   background: none; border: none; text-align: left;
   padding: 10px 14px; font-family: 'DM Sans', sans-serif; font-size: 13px;
@@ -141,7 +120,6 @@ body { font-family: 'DM Sans', sans-serif; min-height: 100vh; background: #f5f5f
 .theme-overflow-item:hover { background: #f5f5f5; }
 .theme-overflow-item.active { background: #f0f0f0; font-weight: 600; color: #111; }
 
-/* ── Imagem de capa ── */
 .cover-preview { width: 100%; max-height: 240px; object-fit: cover; border-radius: 8px; border: 1px solid #ddd; margin-top: 4px; }
 
 /* ── Editor ── */
@@ -158,25 +136,20 @@ body { font-family: 'DM Sans', sans-serif; min-height: 100vh; background: #f5f5f
 }
 .editor-toolbar button:hover { background: #f0f0f0; color: #111; border-color: #ddd; }
 .editor-toolbar button.active { background: #111; color: #fff; border-color: #111; }
+.editor-toolbar button.active svg { fill: #fff; }
 .toolbar-sep { width: 1px; height: 20px; background: #ddd; margin: 0 4px; }
 
 .editor-body {
   background: #fff; border: 1px solid #ddd; color: #111;
   padding: 16px; border-radius: 0 0 8px 8px; min-height: 300px;
   font-family: 'DM Sans', sans-serif; font-size: 15px; line-height: 1.8;
-  outline: none; font-weight: 400;
+  outline: none;
 }
 .editor-body:empty::before { content: attr(data-placeholder); color: #bbb; pointer-events: none; }
 .editor-body img { max-width: 100%; border-radius: 6px; margin: 8px 0; }
 .editor-body b, .editor-body strong { font-weight: 700; }
 .editor-body i, .editor-body em { font-style: italic; }
 .editor-body u { text-decoration: underline; }
-
-.editor-toolbar button svg {
-  width: 16px;
-  height: 16px;
-  flex-shrink: 0;
-}
 
 /* ── Fontes ── */
 .source-row { display: flex; gap: 8px; align-items: center; margin-bottom: 8px; }
@@ -188,7 +161,6 @@ body { font-family: 'DM Sans', sans-serif; min-height: 100vh; background: #f5f5f
   display: flex; align-items: center; justify-content: center;
 }
 .remove-source:hover { border-color: #e05555; color: #e05555; }
-
 .add-source {
   background: none; border: 1px dashed #ddd; color: #aaa;
   padding: 8px 16px; border-radius: 8px; font-family: 'DM Sans', sans-serif;
@@ -196,9 +168,7 @@ body { font-family: 'DM Sans', sans-serif; min-height: 100vh; background: #f5f5f
 }
 .add-source:hover { border-color: #999; color: #555; }
 
-/* ── Erro e publicar ── */
 .write-error { font-size: 12px; color: #e05555; background: rgba(224,85,85,0.08); border-radius: 6px; padding: 8px 12px; }
-
 .publish-btn {
   background: #111; border: none; color: #fff;
   padding: 14px; border-radius: 8px; font-family: 'DM Sans', sans-serif;
@@ -206,7 +176,6 @@ body { font-family: 'DM Sans', sans-serif; min-height: 100vh; background: #f5f5f
 }
 .publish-btn:hover { background: #333; }
 .publish-btn:disabled { opacity: 0.5; cursor: not-allowed; }
-
 .file-btn {
   background: none; border: 1px dashed #ddd; color: #888;
   padding: 10px 18px; border-radius: 8px;
