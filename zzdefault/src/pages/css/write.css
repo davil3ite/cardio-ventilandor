@@ -14,7 +14,7 @@ body { font-family: 'DM Sans', sans-serif; min-height: 100vh; background: #f5f5f
 .header-center { position: absolute; left: 50%; transform: translateX(-50%); }
 .btn-logo { background: none; border: none; cursor: pointer; }
 .btn-back {
-  background: none; border: 1px solid #FDF4F6; color: #FDF4F6;
+  background: none !important; border: 1px solid #FDF4F6 !important; color: #FDF4F6 !important;
   padding: 8px 14px; border-radius: 8px; font-family: 'DM Sans', sans-serif;
   font-size: 12px; cursor: pointer; transition: border-color 0.2s, color 0.2s;
 }
