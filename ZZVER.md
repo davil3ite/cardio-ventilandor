@@ -1,3 +1,11 @@
+# **v1.3.1:**
+
+*- Added co-authorship system*
+*- Added anonymous authorship system*
+*- Added text justifyied alignment option*
+*- Changed rest text alignment's icons to match other text editors'*
+*- Text alignment buttons now get a red background color while selected*
+
 # **v1.3.0:**
 
 *- Moved articles cards to the center of the page*
