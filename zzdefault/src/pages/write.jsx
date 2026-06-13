@@ -1,6 +1,6 @@
 // write.jsx
 
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useCallback } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { getSession } from "../auth.js";
 import { createArticle, updateArticle, getArticleById, getEditions, createEdition, deleteEdition } from "../articles.js";
@@ -95,18 +95,83 @@ function IconAlignJustify() {
 
 /* ── Co-author avatar stack ── */
 function CoauthorStack({ author, coauthors, onAddClick, onRemove, maxReached }) {
-  const [tooltipOpen, setTooltipOpen] = useState(false);
+  // visible: tooltip está visível agora
+  // fadeOut: está em processo de fade-out
+  const [visible, setVisible] = useState(false);
+  const [fadeOut, setFadeOut] = useState(false);
+  const hideTimerRef = useRef(null);
   const tooltipRef = useRef(null);
 
+  // Cancela qualquer timer de esconder pendente
+  const cancelHide = useCallback(() => {
+    if (hideTimerRef.current) {
+      clearTimeout(hideTimerRef.current);
+      hideTimerRef.current = null;
+    }
+  }, []);
+
+  // Inicia a contagem de 3s para esconder (com fade-out)
+  const scheduleHide = useCallback(() => {
+    cancelHide();
+    hideTimerRef.current = setTimeout(() => {
+      setFadeOut(true);
+      // Aguarda a animação de fade (300ms) antes de remover do DOM
+      setTimeout(() => {
+        setVisible(false);
+        setFadeOut(false);
+      }, 300);
+    }, 3000);
+  }, [cancelHide]);
+
+  // Esconde imediatamente, sem animação
+  const hideImmediate = useCallback(() => {
+    cancelHide();
+    setFadeOut(false);
+    setVisible(false);
+  }, [cancelHide]);
+
+  // Esconde com fade imediato (sem delay de 3s), para quando todos co-autores são removidos
+  const hideFade = useCallback(() => {
+    cancelHide();
+    setFadeOut(true);
+    setTimeout(() => {
+      setVisible(false);
+      setFadeOut(false);
+    }, 300);
+  }, [cancelHide]);
+
+  // Clique fora fecha com fade imediato
   useEffect(() => {
     function handleClick(e) {
       if (tooltipRef.current && !tooltipRef.current.contains(e.target)) {
-        setTooltipOpen(false);
+        hideFade();
       }
     }
     document.addEventListener("mousedown", handleClick);
     return () => document.removeEventListener("mousedown", handleClick);
-  }, []);
+  }, [hideFade]);
+
+  // Quando co-autores chegam a zero, fecha sem animação
+  useEffect(() => {
+    if (coauthors.length === 0) {
+      hideImmediate();
+    }
+  }, [coauthors.length, hideImmediate]);
+
+  // Cleanup do timer ao desmontar
+  useEffect(() => () => cancelHide(), [cancelHide]);
+
+  function handleMouseEnter() {
+    if (coauthors.length === 0) return;
+    cancelHide();
+    setFadeOut(false);
+    setVisible(true);
+  }
+
+  function handleMouseLeave() {
+    if (!visible) return;
+    scheduleHide();
+  }
 
   const allAuthors = [{ ...author, isMain: true }, ...coauthors];
 
@@ -115,8 +180,8 @@ function CoauthorStack({ author, coauthors, onAddClick, onRemove, maxReached }) 
       <div
         className="coauthor-avatars"
         ref={tooltipRef}
-        onMouseEnter={() => coauthors.length > 0 && setTooltipOpen(true)}
-        onMouseLeave={() => setTooltipOpen(false)}
+        onMouseEnter={handleMouseEnter}
+        onMouseLeave={handleMouseLeave}
       >
         {allAuthors.map((a, i) => (
           <div
@@ -131,8 +196,12 @@ function CoauthorStack({ author, coauthors, onAddClick, onRemove, maxReached }) 
           </div>
         ))}
 
-        {coauthors.length > 0 && tooltipOpen && (
-          <div className="coauthor-tooltip">
+        {coauthors.length > 0 && visible && (
+          <div
+            className={`coauthor-tooltip${fadeOut ? " coauthor-tooltip--fadeout" : ""}`}
+            onMouseEnter={() => { cancelHide(); setFadeOut(false); }}
+            onMouseLeave={scheduleHide}
+          >
             {coauthors.map(ca => (
               <div key={ca.username} className="coauthor-tooltip-item">
                 <span className="coauthor-tooltip-name">{ca.username}</span>
@@ -163,7 +232,7 @@ function CoauthorStack({ author, coauthors, onAddClick, onRemove, maxReached }) 
 /* ── Modal de busca de co-autor ── */
 function CoauthorSearchModal({ onClose, onAdd, existingUsernames, currentUsername }) {
   const [query, setQuery] = useState("");
-  const [result, setResult] = useState(null); // null | "loading" | "not_found" | { user }
+  const [results, setResults] = useState(null); // null | "loading" | "not_found" | Array<{user}>
   const [adding, setAdding] = useState(false);
   const debounceRef = useRef(null);
   const inputRef = useRef(null);
@@ -173,38 +242,50 @@ function CoauthorSearchModal({ onClose, onAdd, existingUsernames, currentUsernam
   }, []);
 
   useEffect(() => {
-    const q = query.trim().toLowerCase();
-    if (!q) { setResult(null); return; }
+    const q = query.trim();
+    if (!q) { setResults(null); return; }
 
     clearTimeout(debounceRef.current);
-    setResult("loading");
+    setResults("loading");
     debounceRef.current = setTimeout(async () => {
-      const { data } = await supabase
+      // Busca por username (ilike) OU por nome (ilike), apenas adm e adm+
+      const { data, error } = await supabase
         .from("users")
-        .select("name, username, avatar")
-        .eq("username", q)
-        .single();
+        .select("name, username, avatar, type")
+        .or(`username.ilike.%${q}%,name.ilike.%${q}%`)
+        .in("type", ["adm", "adm+"])
+        .limit(8);
 
-      if (!data) {
-        setResult("not_found");
-      } else if (data.username === currentUsername) {
-        setResult("self");
-      } else if (existingUsernames.includes(data.username)) {
-        setResult("already_added");
+      if (error || !data || data.length === 0) {
+        setResults("not_found");
+        return;
+      }
+
+      // Filtra: remove o próprio autor e quem já está adicionado
+      const filtered = data.filter(
+        u => u.username !== currentUsername && !existingUsernames.includes(u.username)
+      );
+
+      if (filtered.length === 0) {
+        // Todos os resultados encontrados já estão adicionados ou são o próprio autor
+        const allSelf = data.every(u => u.username === currentUsername);
+        setResults(allSelf ? "self" : "already_added");
       } else {
-        setResult({ user: data });
+        setResults(filtered);
       }
     }, 400);
 
     return () => clearTimeout(debounceRef.current);
   }, [query]);
 
-  async function handleAdd() {
-    if (!result || typeof result !== "object") return;
+  async function handleAdd(user) {
     setAdding(true);
-    onAdd(result.user);
+    onAdd(user);
     onClose();
   }
+
+  // Determina o estado de exibição especial (string) vs lista de resultados
+  const isSpecialState = results === null || results === "loading" || results === "not_found" || results === "self" || results === "already_added";
 
   return (
     <div className="coauthor-modal-overlay" onClick={onClose}>
@@ -216,30 +297,43 @@ function CoauthorSearchModal({ onClose, onAdd, existingUsernames, currentUsernam
         <input
           ref={inputRef}
           className="coauthor-modal-input"
-          placeholder="username"
+          placeholder="username ou nome"
           value={query}
           onChange={e => setQuery(e.target.value)}
           autoComplete="off"
         />
         <div className="coauthor-modal-result">
-          {result === null && <span className="coauthor-result-hint">Digite o username do co-autor</span>}
-          {result === "loading" && <span className="coauthor-result-hint">Buscando...</span>}
-          {result === "not_found" && <span className="coauthor-result-notfound">Usuário não encontrado</span>}
-          {result === "self" && <span className="coauthor-result-notfound">Você já é o autor</span>}
-          {result === "already_added" && <span className="coauthor-result-notfound">Co-autor já adicionado</span>}
-          {result && typeof result === "object" && (
-            <div className="coauthor-result-found">
-              {result.user.avatar
-                ? <img src={result.user.avatar} className="coauthor-result-avatar" alt={result.user.name} />
-                : <div className="coauthor-result-avatar-placeholder">{result.user.name[0].toUpperCase()}</div>
-              }
-              <div className="coauthor-result-info">
-                <span className="coauthor-result-name">{result.user.name}</span>
-                <span className="coauthor-result-username">{result.user.username}</span>
-              </div>
-              <button className="coauthor-result-add-btn" onClick={handleAdd} disabled={adding}>
-                {adding ? "..." : "Adicionar"}
-              </button>
+          {results === null && <span className="coauthor-result-hint">Digite o username ou nome do co-autor</span>}
+          {results === "loading" && <span className="coauthor-result-hint">Buscando...</span>}
+          {results === "not_found" && <span className="coauthor-result-notfound">Nenhum autor encontrado</span>}
+          {results === "self" && <span className="coauthor-result-notfound">Você já é o autor</span>}
+          {results === "already_added" && <span className="coauthor-result-notfound">Co-autor já adicionado</span>}
+
+          {!isSpecialState && Array.isArray(results) && (
+            <div className="coauthor-result-list">
+              {results.map(user => {
+                const isAdm = user.type === "adm" || user.type === "adm+";
+                return (
+                  <div key={user.username} className="coauthor-result-found">
+                    {user.avatar
+                      ? <img src={user.avatar} className="coauthor-result-avatar" alt={user.name} />
+                      : <div className="coauthor-result-avatar-placeholder">{user.name[0].toUpperCase()}</div>
+                    }
+                    <div className="coauthor-result-info">
+                      <span className="coauthor-result-name">{user.name}</span>
+                      <span className="coauthor-result-username">{user.username}</span>
+                    </div>
+                    <button
+                      className={`coauthor-result-add-btn${!isAdm ? " coauthor-result-add-btn--disabled" : ""}`}
+                      onClick={() => isAdm && !adding && handleAdd(user)}
+                      disabled={adding || !isAdm}
+                      title={!isAdm ? "Apenas admins podem ser co-autores" : "Adicionar"}
+                    >
+                      {adding ? "..." : "Adicionar"}
+                    </button>
+                  </div>
+                );
+              })}
             </div>
           )}
         </div>

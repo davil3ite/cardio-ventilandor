@@ -124,6 +124,14 @@ body { font-family: 'DM Sans', sans-serif; min-height: 100vh; background: #f5f5f
   background: #fff; border: 1px solid #e0e0e0; border-radius: 10px;
   box-shadow: 0 4px 16px rgba(0,0,0,0.10);
   padding: 6px 0; min-width: 160px;
+  opacity: 1;
+  transition: opacity 0.3s ease;
+}
+
+/* Fade-out: apenas opacidade, sem pointer-events */
+.coauthor-tooltip--fadeout {
+  opacity: 0;
+  pointer-events: none;
 }
 
 .coauthor-tooltip-item {
@@ -191,6 +199,11 @@ body { font-family: 'DM Sans', sans-serif; min-height: 100vh; background: #f5f5f
   font-family: 'DM Sans', sans-serif; font-size: 13px; color: #e05555;
 }
 
+/* Lista de resultados de busca */
+.coauthor-result-list {
+  display: flex; flex-direction: column; gap: 6px; width: 100%;
+}
+
 .coauthor-result-found {
   display: flex; align-items: center; gap: 10px; width: 100%;
 }
@@ -221,6 +234,7 @@ body { font-family: 'DM Sans', sans-serif; min-height: 100vh; background: #f5f5f
   font-family: 'DM Sans', sans-serif; font-size: 11px; color: #aaa;
 }
 
+/* Botão Adicionar — estado normal (adm/adm+) */
 .coauthor-result-add-btn {
   background: #111; border: none; color: #fff;
   padding: 7px 14px; border-radius: 7px;
@@ -229,7 +243,17 @@ body { font-family: 'DM Sans', sans-serif; min-height: 100vh; background: #f5f5f
   display: flex; align-items: center; justify-content: center;
 }
 .coauthor-result-add-btn:hover { background: #333; }
-.coauthor-result-add-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+/* Botão Adicionar — desabilitado (type = user) */
+.coauthor-result-add-btn--disabled,
+.coauthor-result-add-btn--disabled:hover {
+  background: #f0f0f0;
+  color: #bbb;
+  border: 1px solid #e0e0e0;
+  cursor: not-allowed;
+}
+
+.coauthor-result-add-btn:disabled { opacity: 1; }
 
 /* ── Campos gerais ── */
 .write-field { display: flex; flex-direction: column; gap: 8px; }
