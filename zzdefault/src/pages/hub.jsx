@@ -11,6 +11,9 @@ const CONTACT_EMAIL = "folhaalfanews@gmail.com";
 
 /* ── Helpers de co-autoria ── */
 function formatAuthorsText(author, coauthors) {
+  // Autoria anônima
+  if (author === "anonymous") return "Autoria Anônima";
+
   const all = [author, ...(coauthors || [])];
   if (all.length === 1) return all[0].name;
   if (all.length === 2) return `${all[0].name} & ${all[1].name}`;
@@ -20,6 +23,15 @@ function formatAuthorsText(author, coauthors) {
 }
 
 function AuthorAvatars({ author, coauthors }) {
+  // Autoria anônima: exibe avatar padrão preto
+  if (author === "anonymous") {
+    return (
+      <div className="card-avatars">
+        <div className="card-avatar-anonymous" />
+      </div>
+    );
+  }
+
   const all = [author, ...(coauthors || [])];
   return (
     <div className="card-avatars">
@@ -70,6 +82,8 @@ function Layout() {
 
   function canEdit(article) {
     if (!session) return false;
+    // Artigos anônimos: só adm+ pode editar
+    if (article.author === "anonymous") return session.type === "adm+";
     return session.username === article.author.username || session.type === "adm+";
   }
 

@@ -94,15 +94,12 @@ function IconAlignJustify() {
 }
 
 /* ── Co-author avatar stack ── */
-function CoauthorStack({ author, coauthors, onAddClick, onRemove, maxReached }) {
-  // visible: tooltip está visível agora
-  // fadeOut: está em processo de fade-out
+function CoauthorStack({ author, coauthors, onAddClick, onRemove, maxReached, anonymous }) {
   const [visible, setVisible] = useState(false);
   const [fadeOut, setFadeOut] = useState(false);
   const hideTimerRef = useRef(null);
   const tooltipRef = useRef(null);
 
-  // Cancela qualquer timer de esconder pendente
   const cancelHide = useCallback(() => {
     if (hideTimerRef.current) {
       clearTimeout(hideTimerRef.current);
@@ -110,12 +107,10 @@ function CoauthorStack({ author, coauthors, onAddClick, onRemove, maxReached }) 
     }
   }, []);
 
-  // Inicia a contagem de 3s para esconder (com fade-out)
   const scheduleHide = useCallback(() => {
     cancelHide();
     hideTimerRef.current = setTimeout(() => {
       setFadeOut(true);
-      // Aguarda a animação de fade (300ms) antes de remover do DOM
       setTimeout(() => {
         setVisible(false);
         setFadeOut(false);
@@ -123,14 +118,12 @@ function CoauthorStack({ author, coauthors, onAddClick, onRemove, maxReached }) 
     }, 3000);
   }, [cancelHide]);
 
-  // Esconde imediatamente, sem animação
   const hideImmediate = useCallback(() => {
     cancelHide();
     setFadeOut(false);
     setVisible(false);
   }, [cancelHide]);
 
-  // Esconde com fade imediato (sem delay de 3s), para quando todos co-autores são removidos
   const hideFade = useCallback(() => {
     cancelHide();
     setFadeOut(true);
@@ -140,7 +133,6 @@ function CoauthorStack({ author, coauthors, onAddClick, onRemove, maxReached }) 
     }, 300);
   }, [cancelHide]);
 
-  // Clique fora fecha com fade imediato
   useEffect(() => {
     function handleClick(e) {
       if (tooltipRef.current && !tooltipRef.current.contains(e.target)) {
@@ -151,14 +143,12 @@ function CoauthorStack({ author, coauthors, onAddClick, onRemove, maxReached }) 
     return () => document.removeEventListener("mousedown", handleClick);
   }, [hideFade]);
 
-  // Quando co-autores chegam a zero, fecha sem animação
   useEffect(() => {
     if (coauthors.length === 0) {
       hideImmediate();
     }
   }, [coauthors.length, hideImmediate]);
 
-  // Cleanup do timer ao desmontar
   useEffect(() => () => cancelHide(), [cancelHide]);
 
   function handleMouseEnter() {
@@ -171,6 +161,22 @@ function CoauthorStack({ author, coauthors, onAddClick, onRemove, maxReached }) 
   function handleMouseLeave() {
     if (!visible) return;
     scheduleHide();
+  }
+
+  // Se anônimo, exibe avatar padrão e mensagem
+  if (anonymous) {
+    return (
+      <div className="coauthor-row">
+        <div className="coauthor-avatars">
+          <div className="coauthor-avatar-wrap" style={{ zIndex: 1 }}>
+            <div className="coauthor-avatar-anonymous" />
+          </div>
+        </div>
+        <span className="coauthor-anonymous-hint">
+          Desative a autoria anônima para adicionar co-autores
+        </span>
+      </div>
+    );
   }
 
   const allAuthors = [{ ...author, isMain: true }, ...coauthors];
@@ -232,7 +238,7 @@ function CoauthorStack({ author, coauthors, onAddClick, onRemove, maxReached }) 
 /* ── Modal de busca de co-autor ── */
 function CoauthorSearchModal({ onClose, onAdd, existingUsernames, currentUsername }) {
   const [query, setQuery] = useState("");
-  const [results, setResults] = useState(null); // null | "loading" | "not_found" | Array<{user}>
+  const [results, setResults] = useState(null);
   const [adding, setAdding] = useState(false);
   const debounceRef = useRef(null);
   const inputRef = useRef(null);
@@ -248,7 +254,6 @@ function CoauthorSearchModal({ onClose, onAdd, existingUsernames, currentUsernam
     clearTimeout(debounceRef.current);
     setResults("loading");
     debounceRef.current = setTimeout(async () => {
-      // Busca por username (ilike) OU por nome (ilike), apenas adm e adm+
       const { data, error } = await supabase
         .from("users")
         .select("name, username, avatar, type")
@@ -261,13 +266,11 @@ function CoauthorSearchModal({ onClose, onAdd, existingUsernames, currentUsernam
         return;
       }
 
-      // Filtra: remove o próprio autor e quem já está adicionado
       const filtered = data.filter(
         u => u.username !== currentUsername && !existingUsernames.includes(u.username)
       );
 
       if (filtered.length === 0) {
-        // Todos os resultados encontrados já estão adicionados ou são o próprio autor
         const allSelf = data.every(u => u.username === currentUsername);
         setResults(allSelf ? "self" : "already_added");
       } else {
@@ -284,7 +287,6 @@ function CoauthorSearchModal({ onClose, onAdd, existingUsernames, currentUsernam
     onClose();
   }
 
-  // Determina o estado de exibição especial (string) vs lista de resultados
   const isSpecialState = results === null || results === "loading" || results === "not_found" || results === "self" || results === "already_added";
 
   return (
@@ -371,6 +373,10 @@ function Write() {
   const [coauthors, setCoauthors] = useState([]);
   const [coauthorModalOpen, setCoauthorModalOpen] = useState(false);
 
+  // Autoria anônima — apenas adm+ pode usar
+  const [anonymous, setAnonymous] = useState(false);
+  const isAdmPlus = session?.type === "adm+";
+
   const bodyRef = useRef(null);
   const coverInputRef = useRef(null);
   const inlineInputRef = useRef(null);
@@ -394,6 +400,8 @@ function Write() {
           setCoverPreview(a.cover_image || "");
           setSources(a.sources?.length ? a.sources : [{ label: "", url: "" }]);
           setCoauthors(a.coauthors || []);
+          // Detecta se o artigo já era anônimo
+          if (a.author === "anonymous") setAnonymous(true);
           if (bodyRef.current) bodyRef.current.innerHTML = a.body;
           if (a.edition_id) {
             getEditions().then(eds => {
@@ -521,10 +529,20 @@ function Write() {
     setCoauthors(prev => prev.filter(ca => ca.username !== username));
   }
 
+  function handleAnonymousToggle() {
+    setAnonymous(v => !v);
+  }
+
   async function handlePublish() {
     if (!headline.trim()) { setError("A manchete é obrigatória."); return; }
     if (!body.trim() || body === "<br>") { setError("O texto é obrigatório."); return; }
     setPublishing(true);
+
+    // Se anônimo, salva author como string "anonymous" e ignora co-autores
+    const authorData = anonymous
+      ? "anonymous"
+      : { name: session.name, username: session.username, avatar: session.avatar || "" };
+
     const data = {
       type,
       theme,
@@ -533,8 +551,8 @@ function Write() {
       coverImage,
       images: [],
       sources: sources.filter(s => s.url.trim()),
-      author: { name: session.name, username: session.username, avatar: session.avatar || "" },
-      coauthors: coauthors.length > 0 ? coauthors : null,
+      author: authorData,
+      coauthors: anonymous ? null : (coauthors.length > 0 ? coauthors : null),
       editionId: selectedEdition?.id || null,
     };
     if (id) await updateArticle(id, data);
@@ -564,6 +582,19 @@ function Write() {
 
       <main className="write-content">
         <div className="write-card">
+
+          {/* Checkbox de autoria anônima — só aparece para adm+ */}
+          {isAdmPlus && (
+            <label className="anonymous-checkbox-label">
+              <input
+                type="checkbox"
+                className="anonymous-checkbox"
+                checked={anonymous}
+                onChange={handleAnonymousToggle}
+              />
+              <span>Autoria Anônima</span>
+            </label>
+          )}
 
           {/* Título + dropdown de edição */}
           <div className="write-title-row">
@@ -630,6 +661,7 @@ function Write() {
             onAddClick={() => setCoauthorModalOpen(true)}
             onRemove={handleRemoveCoauthor}
             maxReached={maxReached}
+            anonymous={anonymous}
           />
 
           {/* Tipo */}

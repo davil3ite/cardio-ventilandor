@@ -11,6 +11,9 @@ const CONTACT_EMAIL = "folhaalfanews@gmail.com";
 
 /* ── Helpers de co-autoria ── */
 function formatAuthorsText(author, coauthors) {
+  // Autoria anônima
+  if (author === "anonymous") return "Autoria Anônima";
+
   const all = [author, ...(coauthors || [])];
   if (all.length === 1) return all[0].name;
   if (all.length === 2) return `${all[0].name} & ${all[1].name}`;
@@ -20,6 +23,15 @@ function formatAuthorsText(author, coauthors) {
 }
 
 function AuthorAvatars({ author, coauthors }) {
+  // Autoria anônima: exibe avatar padrão preto
+  if (author === "anonymous") {
+    return (
+      <div className="article-avatars">
+        <div className="article-avatar-anonymous" />
+      </div>
+    );
+  }
+
   const all = [author, ...(coauthors || [])];
   return (
     <div className="article-avatars">
@@ -66,7 +78,12 @@ function Article() {
   if (loading) return <div style={{ display:"flex", alignItems:"center", justifyContent:"center", height:"100vh", background:"#f5f5f5" }}><p style={{ color: "#aaa", fontFamily: "Syne, sans-serif" }}>Carregando...</p></div>;
   if (!article) return <div style={{ display:"flex", alignItems:"center", justifyContent:"center", height:"100vh", background:"#f5f5f5" }}><p style={{ color: "#aaa", fontFamily: "Syne, sans-serif" }}>Matéria não encontrada.</p></div>;
 
-  const canEdit = session && (session.username === article.author.username || session.type === "adm+");
+  // Artigos anônimos: só adm+ pode editar/deletar
+  const canEdit = session && (
+    article.author === "anonymous"
+      ? session.type === "adm+"
+      : session.username === article.author.username || session.type === "adm+"
+  );
 
   async function handleDelete() {
     if (window.confirm("Tem certeza que quer deletar esta matéria?")) { await deleteArticle(id); navigate("/"); }

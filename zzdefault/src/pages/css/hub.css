@@ -165,6 +165,13 @@ button { display: flex; align-items: center; justify-content: center; text-align
   font-family: 'DM Sans', sans-serif; flex-shrink: 0; position: relative;
 }
 
+/* Avatar anônimo no card */
+.card-avatar-anonymous {
+  width: 20px; height: 20px; border-radius: 50%;
+  background: #222; border: 1.5px solid #fff;
+  flex-shrink: 0; position: relative;
+}
+
 .card-actions { display: flex; gap: 6px; margin-top: 6px; }
 .card-action-btn {
   background: none; border: 1px solid #ddd; border-radius: 6px;
