@@ -10,7 +10,7 @@ body { font-family: 'DM Sans', sans-serif; background: #f5f5f5; color: #111; min
 
 button { display: flex; align-items: center; justify-content: center; text-align: center; }
 
-.layout { min-height: 100vh; width: 100%; }
+.layout { min-height: 100vh; width: 100%; display: flex; flex-direction: column; }
 
 .header {
   position: fixed; top: 0; left: 0; right: 0; z-index: 100;
@@ -90,7 +90,7 @@ button { display: flex; align-items: center; justify-content: center; text-align
 }
 
 .page-content {
-  padding-top: 64px; padding-bottom: 48px; min-height: 100vh;
+  padding-top: 64px; flex: 1;
   display: flex; align-items: flex-start; justify-content: center; width: 100%;
 }
 
@@ -207,7 +207,7 @@ button { display: flex; align-items: center; justify-content: center; text-align
 .sidebar-email:hover { color: #111; }
 
 .footer {
-  position: fixed; bottom: 0; left: 0; right: 0; height: 48px;
+  height: 48px;
   background: #FF1E2D !important; border-top: 1px solid rgb(215, 41, 41) !important;
   display: flex; align-items: center; justify-content: center;
   gap: 12px; padding: 0 32px; z-index: 100;

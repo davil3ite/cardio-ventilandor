@@ -90,7 +90,7 @@ function Article() {
   }
 
   return (
-    <div>
+    <div className="article-page">
       <header className="header">
         <div className="header-left">
           <button className="btn-back" onClick={() => navigate("/")}>◀</button>
