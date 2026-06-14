@@ -26,7 +26,7 @@ function Login() {
   }
 
   return (
-    <div>
+    <div className="auth-page">
       <header className="header">
         <div className="header-left" />
         <div className="header-center">
