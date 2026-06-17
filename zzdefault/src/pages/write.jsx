@@ -12,6 +12,8 @@ const THEMES = ["Esportes", "Cultura", "Escola", "Mundo", "Ciência", "Tecnologi
 const THEMES_VISIBLE = 6;
 const MAX_COAUTHORS = 4;
 
+const PARAGRAPH_INDENT = "3em";
+
 function fileToBase64(file) {
   return new Promise((res, rej) => {
     const reader = new FileReader();
@@ -50,6 +52,50 @@ function applyFormat(tag) {
   newRange.selectNodeContents(wrapper);
   sel.removeAllRanges();
   sel.addRange(newRange);
+}
+
+/* ── Recuo de parágrafo (Tab) ──
+   Encontra o bloco onde o cursor está dentro do editor e aplica/remove
+   text-indent. Se o cursor estiver em texto solto (filho direto do editor),
+   envolve a linha num <div> antes de recuar, para não recuar o editor todo. */
+function findParagraphBlock(editor, node) {
+  // Sobe a partir do nó do cursor até o filho direto do editor
+  let current = node;
+  while (current && current.parentNode !== editor && current !== editor) {
+    current = current.parentNode;
+  }
+  if (!current || current === editor) return null;
+  // Só aceita blocos de elemento (DIV/P), não imagens ou texto solto
+  if (current.nodeType !== 1) return null;
+  const tag = current.nodeName;
+  if (tag !== "DIV" && tag !== "P") return null;
+  return current;
+}
+
+function toggleParagraphIndent(editor, remove) {
+  const sel = window.getSelection();
+  if (!sel || sel.rangeCount === 0) return;
+  let node = sel.anchorNode;
+  if (!node) return;
+
+  let block = findParagraphBlock(editor, node);
+
+  // Texto solto direto no editor: envolve a linha atual num <div>
+  if (!block) {
+    // formatBlock transforma a linha do cursor num bloco
+    document.execCommand("formatBlock", false, "div");
+    node = window.getSelection().anchorNode;
+    block = findParagraphBlock(editor, node);
+  }
+
+  if (!block) return;
+
+  if (remove) {
+    block.style.textIndent = "";
+    if (!block.getAttribute("style")) block.removeAttribute("style");
+  } else {
+    block.style.textIndent = PARAGRAPH_INDENT;
+  }
 }
 
 function IconAlignLeft() {
@@ -456,6 +502,16 @@ function Write() {
 
   function handleBodyChange() { setBody(bodyRef.current.innerHTML); }
 
+  // Tab = recuo de parágrafo; Shift+Tab = remove o recuo
+  function handleKeyDown(e) {
+    if (e.key === "Tab") {
+      e.preventDefault();
+      bodyRef.current.focus();
+      toggleParagraphIndent(bodyRef.current, e.shiftKey);
+      setBody(bodyRef.current.innerHTML);
+    }
+  }
+
   function updateActiveFormats() {
     const sel = window.getSelection();
     if (!sel || sel.rangeCount === 0) return;
@@ -750,6 +806,7 @@ function Write() {
               suppressContentEditableWarning
               onInput={handleBodyChange}
               onPaste={handlePaste}
+              onKeyDown={handleKeyDown}
               onKeyUp={updateActiveFormats}
               onMouseUp={updateActiveFormats}
               data-placeholder="Escreva sua matéria aqui..."
