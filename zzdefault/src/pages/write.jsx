@@ -8,7 +8,7 @@ import supabase from "../supabase.js";
 import "./css/write.css";
 
 const TYPES = ["Notícia", "Reportagem", "Artigo de opinião", "Crônica"];
-const THEMES = ["Esportes", "Cultura", "SESI", "Mundo", "Ciência", "Tecnologia", "Saúde", "Arte", "UDIA", "Entretenimento"];
+const THEMES = ["Esportes", "Cultura", "Escola", "Mundo", "Ciência", "Tecnologia", "Saúde", "Arte"];
 const THEMES_VISIBLE = 6;
 const MAX_COAUTHORS = 4;
 
@@ -302,7 +302,7 @@ function CoauthorSearchModal({ onClose, onAdd, existingUsernames, currentUsernam
     debounceRef.current = setTimeout(async () => {
       const { data, error } = await supabase
         .from("users")
-        .select("name, username, avatar, type")
+        .select("id, name, username, avatar, type")
         .or(`username.ilike.%${q}%,name.ilike.%${q}%`)
         .in("type", ["adm", "adm+"])
         .limit(8);
@@ -578,7 +578,7 @@ function Write() {
   function updateSource(i, field, value) { setSources(s => s.map((src, idx) => idx === i ? { ...src, [field]: value } : src)); }
 
   function handleAddCoauthor(user) {
-    setCoauthors(prev => [...prev, { name: user.name, username: user.username, avatar: user.avatar || "" }]);
+    setCoauthors(prev => [...prev, { id: user.id, name: user.name, username: user.username, avatar: user.avatar || "" }]);
   }
 
   function handleRemoveCoauthor(username) {
@@ -592,12 +592,24 @@ function Write() {
   async function handlePublish() {
     if (!headline.trim()) { setError("A manchete é obrigatória."); return; }
     if (!body.trim() || body === "<br>") { setError("O texto é obrigatório."); return; }
+    if (!anonymous && session?.id == null) {
+      setError("Sessão inválida. Faça login novamente e tente de novo.");
+      return;
+    }
     setPublishing(true);
 
-    // Se anônimo, salva author como string "anonymous" e ignora co-autores
+    // Se anônimo, salva author como string "anonymous" e ignora co-autores.
+    // Caso contrário, salva apenas a referência por id — nome/foto são
+    // buscados na hora de exibir, então mudanças de perfil refletem sozinhas.
     const authorData = anonymous
       ? "anonymous"
-      : { name: session.name, username: session.username, avatar: session.avatar || "" };
+      : { id: session.id };
+
+    // Co-autores viram referências por id. Se algum não tiver id (formato
+    // antigo carregado numa edição), preserva o objeto original como fallback.
+    const coauthorRefs = coauthors.length > 0
+      ? coauthors.map(c => (c.id != null ? { id: c.id } : c))
+      : null;
 
     const data = {
       type,
@@ -608,7 +620,7 @@ function Write() {
       images: [],
       sources: sources.filter(s => s.url.trim()),
       author: authorData,
-      coauthors: anonymous ? null : (coauthors.length > 0 ? coauthors : null),
+      coauthors: anonymous ? null : coauthorRefs,
       editionId: selectedEdition?.id || null,
     };
     if (id) await updateArticle(id, data);

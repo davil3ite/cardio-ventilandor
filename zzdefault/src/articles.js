@@ -54,6 +54,83 @@ export async function deleteEdition(id) {
   return { ok: true };
 }
 
+// ── Resolução de autores (por id) ─────────────────────────────────────────────
+//
+// O autor e os co-autores são salvos como referência de id: { id: <user_id> }.
+// Na hora de exibir, buscamos os dados ATUAIS na tabela users, de modo que
+// mudanças de nome/foto/username reflitam automaticamente nos artigos.
+//
+// Casos tratados:
+//   - author === "anonymous"        -> mantém "anonymous" (autoria anônima)
+//   - author === { id }             -> busca dados atuais do usuário (formato novo)
+//   - author === { username, ... }  -> fallback: usa os dados congelados (formato antigo)
+//   - usuário não encontrado (conta deletada) -> usa o que houver, ou placeholder
+
+function isIdRef(obj) {
+  return obj && typeof obj === "object" && obj.id !== undefined && obj.id !== null;
+}
+
+function collectIds(articles) {
+  const ids = new Set();
+  for (const a of articles) {
+    if (isIdRef(a.author)) ids.add(a.author.id);
+    if (Array.isArray(a.coauthors)) {
+      for (const c of a.coauthors) {
+        if (isIdRef(c)) ids.add(c.id);
+      }
+    }
+  }
+  return [...ids];
+}
+
+// Monta o objeto de exibição { name, username, avatar } a partir de uma
+// referência (id) usando o mapa de usuários; ou a partir do objeto antigo.
+function resolveOne(ref, userMap) {
+  if (isIdRef(ref)) {
+    const u = userMap[ref.id];
+    if (u) {
+      return { id: u.id, name: u.name, username: u.username, avatar: u.avatar || "" };
+    }
+    // usuário não existe mais (conta deletada)
+    return { id: ref.id, name: "Usuário removido", username: "", avatar: "" };
+  }
+  // formato antigo: já é { name, username, avatar } (sem id)
+  if (ref && typeof ref === "object") {
+    return { name: ref.name, username: ref.username, avatar: ref.avatar || "" };
+  }
+  return { name: "", username: "", avatar: "" };
+}
+
+// Recebe a lista crua de artigos e devolve com author/coauthors resolvidos.
+async function hydrateAuthors(articles) {
+  const ids = collectIds(articles);
+
+  let userMap = {};
+  if (ids.length > 0) {
+    const { data: users } = await supabase
+      .from("users")
+      .select("id, name, username, avatar")
+      .in("id", ids);
+    if (users) {
+      for (const u of users) userMap[u.id] = u;
+    }
+  }
+
+  return articles.map(a => {
+    // Autoria anônima: não resolve, mantém a string
+    const author = a.author === "anonymous"
+      ? "anonymous"
+      : resolveOne(a.author, userMap);
+
+    let coauthors = null;
+    if (Array.isArray(a.coauthors) && a.coauthors.length > 0) {
+      coauthors = a.coauthors.map(c => resolveOne(c, userMap));
+    }
+
+    return { ...a, author, coauthors };
+  });
+}
+
 // ── Artigos ───────────────────────────────────────────────────────────────────
 
 export async function getArticles() {
@@ -62,7 +139,7 @@ export async function getArticles() {
     .select("*")
     .order("created_at", { ascending: false });
   if (error) return [];
-  return data;
+  return await hydrateAuthors(data);
 }
 
 export async function getArticleById(id) {
@@ -72,7 +149,8 @@ export async function getArticleById(id) {
     .eq("id", id)
     .single();
   if (error) return null;
-  return data;
+  const [hydrated] = await hydrateAuthors([data]);
+  return hydrated;
 }
 
 export async function createArticle({ type, theme, headline, body, coverImage, images, sources, author, coauthors, editionId }) {
